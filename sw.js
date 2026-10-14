@@ -1,13 +1,13 @@
 const CACHE_NAME = 'scuba-weather-v1';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/api.js',
-  '/js/map.js',
-  '/js/logic.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './css/style.css',
+  './js/app.js',
+  './js/api.js',
+  './js/map.js',
+  './js/logic.js',
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
