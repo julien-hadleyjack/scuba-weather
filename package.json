@@ -1,0 +1,24 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Weather application for scuba divers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julien-hadleyjack/scuba-weather.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/julien-hadleyjack/scuba-weather/issues"
+  },
+  "homepage": "https://github.com/julien-hadleyjack/scuba-weather#readme",
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  }
+}

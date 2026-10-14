@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scuba Weather</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Scuba Weather</h1>
+    <div id="stale-warning" class="hidden">Stale Data: Sync Required</div>
+  </header>
+
+  <main>
+    <section id="location-section">
+      <div class="search-container">
+        <input type="text" id="location-search" placeholder="Search for a location...">
+        <button id="search-btn">Search</button>
+      </div>
+      <div id="map-container">
+        <div id="map"></div>
+      </div>
+      <div id="current-location-info">
+        Selected Location: <span id="lat-lng-display">10.0956, 99.8404</span>
+      </div>
+    </section>
+
+    <section id="date-navigation" class="hidden">
+      <button id="prev-day">&lt;</button>
+      <div id="current-date-display">Today</div>
+      <button id="next-day">&gt;</button>
+      <button id="today-btn">Today</button>
+    </section>
+
+    <section id="metrics-section" class="hidden">
+      <div id="safety-score-card" class="card">
+        <h2>Surface Safety Score</h2>
+        <div id="score-display" class="score">--</div>
+        <div id="score-category"></div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="card">
+          <h3>Swell & Waves</h3>
+          <div>Height: <span id="wave-height">--</span> m</div>
+          <div>Period: <span id="wave-period">--</span> s</div>
+          <div>Direction: <span id="wave-direction">--</span>&deg;</div>
+        </div>
+        <div class="card">
+          <h3>Wind</h3>
+          <div>Speed: <span id="wind-speed">--</span> kts</div>
+          <div>Gusts: <span id="wind-gusts">--</span> kts</div>
+          <div>Direction: <span id="wind-direction">--</span>&deg;</div>
+        </div>
+        <div class="card">
+          <h3>Precipitation</h3>
+          <div>Probability: <span id="precip-prob">--</span>%</div>
+          <div>Accumulation: <span id="precip-vol">--</span> mm</div>
+        </div>
+        <div class="card">
+          <h3>Sun</h3>
+          <div>Sunrise: <span id="sunrise">--</span></div>
+          <div>Sunset: <span id="sunset">--</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="disclaimer">
+      <p><strong>Disclaimer:</strong> This application calculates a Surface Safety Score, which reflects boat transit comfort and surface water entry/exit conditions. It is NOT an underwater visibility prediction. Visibility is affected by runoff, tidal flow, and plankton blooms not tracked by this algorithm.</p>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/logic.js"></script>
+  <script src="./js/map.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
