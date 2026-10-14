@@ -1,0 +1,208 @@
+const DEFAULT_LAT = 10.0956;
+const DEFAULT_LNG = 99.8404;
+
+let currentLat = DEFAULT_LAT;
+let currentLng = DEFAULT_LNG;
+let currentDateOffset = 0; // 0 is today, max 6
+let currentWeatherData = null;
+let currentMarineData = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then(
+        (registration) => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        },
+        (err) => {
+          console.log('ServiceWorker registration failed: ', err);
+        }
+      );
+    });
+  }
+
+  // Initialize Map
+  window.mapModule.initMap(currentLat, currentLng, onMapPinChanged);
+
+  // Setup UI Listeners
+  document.getElementById('search-btn').addEventListener('click', onSearch);
+  document.getElementById('location-search').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') onSearch();
+  });
+
+  document.getElementById('prev-day').addEventListener('click', () => changeDate(-1));
+  document.getElementById('next-day').addEventListener('click', () => changeDate(1));
+  document.getElementById('today-btn').addEventListener('click', () => {
+    currentDateOffset = 0;
+    updateUI();
+  });
+
+  // Initial Load
+  loadDataForLocation(currentLat, currentLng);
+});
+
+async function onMapPinChanged(lat, lng) {
+  currentLat = lat;
+  currentLng = lng;
+  document.getElementById('lat-lng-display').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  currentDateOffset = 0;
+  await loadDataForLocation(lat, lng);
+}
+
+async function onSearch() {
+  const query = document.getElementById('location-search').value;
+  if (!query) return;
+
+  const result = await window.api.geocodeLocation(query);
+  if (result) {
+    currentLat = result.latitude;
+    currentLng = result.longitude;
+    document.getElementById('lat-lng-display').textContent = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+    window.mapModule.updateMapLocation(currentLat, currentLng);
+    currentDateOffset = 0;
+    await loadDataForLocation(currentLat, currentLng);
+  } else {
+    alert('Location not found');
+  }
+}
+
+async function loadDataForLocation(lat, lng) {
+  document.getElementById('stale-warning').classList.add('hidden');
+  document.getElementById('metrics-section').classList.add('hidden');
+  document.getElementById('date-navigation').classList.add('hidden');
+
+  let weatherData = null;
+  let marineData = null;
+
+  try {
+    weatherData = await window.api.fetchWeatherData(lat, lng);
+    marineData = await window.api.fetchMarineData(lat, lng);
+  } catch (err) {
+    console.error('Network fetch failed, attempting to read from cache...', err);
+  }
+
+  if (weatherData && marineData) {
+    window.logic.saveForecastToStorage(lat, lng, weatherData, marineData);
+    currentWeatherData = weatherData;
+    currentMarineData = marineData;
+  } else {
+    // Attempt to load from storage
+    const stored = window.logic.getForecastFromStorage(lat, lng);
+    if (stored) {
+      if (stored.blocked) {
+        alert('Data is too stale (> 48 hours). Please connect to the internet to sync.');
+        return;
+      }
+
+      currentWeatherData = stored.data.weatherData;
+      currentMarineData = stored.data.marineData;
+
+      if (stored.stale) {
+        document.getElementById('stale-warning').classList.remove('hidden');
+      }
+    } else {
+      alert('Unable to fetch data and no cached data available for this location.');
+      return;
+    }
+  }
+
+  updateUI();
+}
+
+function changeDate(delta) {
+  const newOffset = currentDateOffset + delta;
+  if (newOffset >= 0 && newOffset <= 6) {
+    currentDateOffset = newOffset;
+    updateUI();
+  }
+}
+
+function updateUI() {
+  if (!currentWeatherData || !currentMarineData) return;
+
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + currentDateOffset);
+  const dateString = targetDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+
+  document.getElementById('current-date-display').textContent = currentDateOffset === 0 ? 'Today' : dateString;
+
+  document.getElementById('prev-day').disabled = currentDateOffset === 0;
+  document.getElementById('next-day').disabled = currentDateOffset === 6;
+
+  // Compute daily averages/maxes for the target day.
+  // The API returns hourly data. We'll sample data for 12:00 PM of the target day.
+  const year = targetDate.getFullYear();
+  const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+  const day = String(targetDate.getDate()).padStart(2, '0');
+  const targetDateStr = `${year}-${month}-${day}`;
+
+  // Find index in hourly data for approx 12:00
+  let wIndex = currentWeatherData.hourly.time.findIndex(t => t.startsWith(`${targetDateStr}T12:00`));
+  if (wIndex === -1) {
+    wIndex = currentWeatherData.hourly.time.findIndex(t => t.startsWith(targetDateStr)); // fallback to start of day
+  }
+
+  if (wIndex === -1) {
+    console.error('Data not available for this date');
+    return;
+  }
+
+  let mIndex = currentMarineData.hourly.time.findIndex(t => t.startsWith(`${targetDateStr}T12:00`));
+  if (mIndex === -1) {
+    mIndex = currentMarineData.hourly.time.findIndex(t => t.startsWith(targetDateStr));
+  }
+
+  // Weather metrics
+  const windSpeedKm = currentWeatherData.hourly.wind_speed_10m[wIndex];
+  const windGustsKm = currentWeatherData.hourly.wind_gusts_10m[wIndex];
+  const windDirection = currentWeatherData.hourly.wind_direction_10m[wIndex];
+  const precipProb = currentWeatherData.hourly.precipitation_probability[wIndex];
+  const precipVol = currentWeatherData.hourly.precipitation[wIndex];
+
+  // Convert km/h to kts (1 km/h = 0.539957 kts)
+  const windSpeedKts = windSpeedKm * 0.539957;
+  const windGustsKts = windGustsKm * 0.539957;
+
+  // Marine metrics
+  const waveHeight = currentMarineData.hourly.wave_height[mIndex];
+  const wavePeriod = currentMarineData.hourly.wave_period[mIndex];
+  const waveDirection = currentMarineData.hourly.wave_direction[mIndex];
+
+  // Daily metrics
+  // Find daily index
+  const dIndex = currentWeatherData.daily.time.findIndex(t => t === targetDateStr);
+  const sunrise = dIndex !== -1 ? currentWeatherData.daily.sunrise[dIndex].split('T')[1] : '--';
+  const sunset = dIndex !== -1 ? currentWeatherData.daily.sunset[dIndex].split('T')[1] : '--';
+
+  // Update UI Elements
+  document.getElementById('wave-height').textContent = waveHeight !== null ? waveHeight.toFixed(1) : '--';
+  document.getElementById('wave-period').textContent = wavePeriod !== null ? wavePeriod.toFixed(1) : '--';
+  document.getElementById('wave-direction').textContent = waveDirection !== null ? waveDirection : '--';
+
+  document.getElementById('wind-speed').textContent = windSpeedKts ? windSpeedKts.toFixed(1) : '--';
+  document.getElementById('wind-gusts').textContent = windGustsKts ? windGustsKts.toFixed(1) : '--';
+  document.getElementById('wind-direction').textContent = windDirection !== null ? windDirection : '--';
+
+  document.getElementById('precip-prob').textContent = precipProb !== null ? precipProb : '--';
+  document.getElementById('precip-vol').textContent = precipVol !== null ? precipVol.toFixed(1) : '--';
+
+  document.getElementById('sunrise').textContent = sunrise;
+  document.getElementById('sunset').textContent = sunset;
+
+  // Calculate and display safety score
+  const safety = window.logic.calculateSafetyScore(
+    waveHeight || 0,
+    wavePeriod || 0,
+    windSpeedKts || 0,
+    precipProb || 0
+  );
+
+  const scoreDisplay = document.getElementById('score-display');
+  scoreDisplay.textContent = safety.score;
+  scoreDisplay.className = `score ${safety.colorClass}`;
+
+  document.getElementById('score-category').textContent = safety.category;
+
+  document.getElementById('date-navigation').classList.remove('hidden');
+  document.getElementById('metrics-section').classList.remove('hidden');
+}
