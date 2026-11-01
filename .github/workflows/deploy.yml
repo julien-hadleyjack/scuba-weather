@@ -13,9 +13,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # mise ignores [settings] (the Node version from .nvmrc) in untrusted folders.
-      MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7

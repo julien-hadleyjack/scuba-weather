@@ -7,24 +7,16 @@
     "group:allNonMajor",
     "schedule:weekly"
   ],
+  "description": "Weekly updates for npm, GitHub Actions and mise tools (Node: LTS releases only). Everything merges straight into main without a PR once CI passes on the branch; failing updates become PRs.",
+  "enabledManagers": ["npm", "github-actions", "mise"],
   "minimumReleaseAge": "3 days",
-  "packageRules": [
-    {
-      "description": "Non-major updates merge straight into main (no PR) once CI on the branch is green; a failing branch becomes a PR.",
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest", "lockFileMaintenance"],
-      "automerge": true,
-      "automergeType": "branch"
-    },
-    {
-      "description": "Keep @types/node on the Node major from .nvmrc.",
-      "matchPackageNames": ["@types/node"],
-      "matchUpdateTypes": ["major"],
-      "enabled": false
-    }
-  ],
-  "vulnerabilityAlerts": {
+  "automerge": true,
+  "automergeType": "branch",
+  "lockFileMaintenance": {
     "automerge": true,
-    "automergeType": "branch",
+    "automergeType": "branch"
+  },
+  "vulnerabilityAlerts": {
     "minimumReleaseAge": null,
     "schedule": ["at any time"]
   }

@@ -9,7 +9,7 @@ What the app does and why: [SPEC.md](SPEC.md). Wireframes: [view in the browser]
 ## Run
 
 ```sh
-mise trust && mise install && prek install   # Node, prek and Git hooks
+mise install && prek install   # Node, prek and Git hooks
 npm install
 npm run dev        # http://localhost:5173
 npm test           # unit, component and accessibility tests (Vitest)
@@ -21,8 +21,8 @@ npm run preview    # serve dist/ locally
 npm run icons      # re-render PNG icons from public/favicon.svg
 ```
 
-Pushes to `main` deploy to GitHub Pages. Renovate merges minor and patch dependency updates
-weekly once CI passes; major updates and failures come as PRs.
+Pushes to `main` deploy to GitHub Pages. Renovate updates all dependencies weekly (Node: latest
+LTS) and merges them into `main` once CI passes; failing updates come as PRs.
 
 ## Layout
 
