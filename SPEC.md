@@ -1,8 +1,8 @@
 # Scuba Weather: specification
 
-Version 1.2 · 2026-11-01
+Version 1.3 · 2026-11-01
 
-Single source for what the app does and why. Combines the planning decisions and the requirements (v1.2). Wireframes: [`docs/wireframes/`](docs/wireframes/index.html).
+Single source for what the app does and why. Combines the planning decisions and the requirements (v1.3). Wireframes: [`docs/wireframes/`](docs/wireframes/index.html).
 
 Requirement IDs (SPOT-, DASH-, DATA-, OFF-, NFR-, TEST-) are stable and referenced from code and tests.
 
@@ -44,15 +44,15 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
 ## 3. Choosing the dive spot
 
 - **SPOT-1** On first launch (no spot stored) the app opens the "Choose dive spot" screen.
-- **SPOT-2** The screen has a search field at the top. From 2 typed characters, the app queries the Open-Meteo Geocoding API (debounced, ~300 ms) and shows up to 5 results below the field, each with name and region/country (region = first-level region and country, e.g. "Surat Thani, Thailand"). States in the list: "Searching…", "No places found.", "Search failed. Check your connection." The search follows the accessible combobox pattern (arrow keys, Enter, Escape).
+- **SPOT-2** The screen has a search field at the top. From 2 typed characters, the app queries the Open-Meteo Geocoding API (debounced, ~300 ms) and shows up to 5 results below the field, each with name and region/country (region = first-level region and country, e.g. "Surat Thani, Thailand"). States in the list: "Searching…", "No places found.", "Search failed. Check your connection." The search follows the accessible combobox pattern (arrow keys, Enter, Escape). Choosing a result cancels any search that is still pending or running, so the list stays closed.
 - **SPOT-3** Until a search result has been chosen, there is no map and no bottom sheet. The map area shows a search icon and one line: "Search for a place, island or dive site above." (Offline: "You are offline. Choosing a dive spot needs a connection.") This makes clear that the pin can't be placed without a search. Choosing a result shows the map centred on it (zoom 12) with the pin there. Choosing another result later moves the map.
 - **SPOT-4** The map (Leaflet + OpenStreetMap tiles) has a fixed pin in the centre; the user drags the map to move the pin. Zoom buttons and pinch zoom work.
-- **SPOT-5** The land check runs only when the user taps "Use this spot", not while the map moves. The app requests the Marine API's current `wave_height` for the pin position: a value means "on water" (the spot is saved), null means "on land", a failed request means "Check failed". Moving the map cancels a running check and clears its result.
+- **SPOT-5** The land check runs only when the user taps "Use this spot", not while the map moves. The app requests the Marine API's current `wave_height` for the pin position: a value means "on water" (the spot is saved), null means "on land", a failed request means "Check failed". Moving the map, or choosing another search result, cancels a running check and clears its result (also when the map doesn't actually move).
   - *Why on save:* every water-based value (waves, water temperature, tide curve, and any added later) needs marine data at the spot, so a saved spot must always have it; checking once on save avoids a request for every map move.
   - *Known limitation:* marine data comes in squares of about 8 km, so pins near a coast or on a small island usually count as water. Only clearly inland points are rejected.
 - **SPOT-6** Bottom sheet (only once a result has been chosen): spot name and region/country (from the chosen search result, not editable, kept when the pin is moved away), coordinates ("10.06° N, 99.82° E", updated when the map stops moving), a short hint ("Drag the map to move the pin onto open water close to your dive site."), and the "Use this spot" button. After a failed check, an amber status above the hint: "Pin is on land" (hint: "Move the pin onto open water, then try again.") or "Check failed" (hint: "Couldn't check this position. Tap the button to try again.").
 - **SPOT-7** "Use this spot" runs the land check (SPOT-5). While it runs, the button is disabled and reads "Checking position…" with a spinner. After "Pin is on land", the button stays disabled until the map is moved; after "Check failed", it can be tapped again. Offline, the button is disabled.
-- **SPOT-8** Saving a spot stores name, region/country, and the pin's latitude and longitude on the device (replacing any previous spot and its forecast) and opens the dashboard.
+- **SPOT-8** Saving a spot stores name, region/country, and the pin's latitude and longitude on the device (replacing any previous spot and its forecast) and opens the dashboard. A refresh still running for the previous spot is ignored: its result is discarded and it doesn't end the new spot's loading state; the new spot's refresh starts right away.
 - **SPOT-9** The map code is loaded only when this screen opens (lazy loading).
 - **SPOT-10** When a spot is already stored, the screen opens with that spot's name and the map at its position, and shows a back button that returns to the dashboard without changes.
 
@@ -176,10 +176,12 @@ Screen readers hear the severity before the text, e.g. "Marginal, Wind, 24 km/h 
 - **DATA-1** Forecast API: hourly `precipitation, weather_code, cape, wind_speed_10m, wind_gusts_10m, wind_direction_10m`; daily `sunrise, sunset`; `timezone=auto`, `wind_speed_unit=kmh`, `forecast_days=6`.
 - **DATA-2** Marine API: hourly `wave_height, wave_period, sea_level_height_msl, sea_surface_temperature`; `timezone=auto`, `forecast_days=6`.
   - *Why 6 days:* a forecast up to 12 h old (the most the app shows, OFF-5) must still cover today, tomorrow and the three outlook days after the date has changed at the spot.
-- **DATA-3** Both requests run in parallel. A refresh only counts as successful if both succeed. Any HTTP error, including rate limiting (429), or an error in the response counts as a failed refresh.
+- **DATA-3** Both requests run in parallel. A refresh only counts as successful if both succeed. Any HTTP error, including rate limiting (429), an error in the response, or a request that hasn't completed within **20 seconds** counts as a failed refresh. A timed-out request is cancelled.
 - **DATA-4** All dates and times use the spot's local time zone as returned by the API, independent of the phone's time zone.
+  - *Known limitation:* if the browser doesn't know the spot's IANA time zone, the app uses the fixed UTC offset returned with the forecast. After a daylight-saving change during the forecast's lifetime, local times are then off by the DST shift until the next refresh. Current iOS Safari and Android Chrome know all zones, so this is a fallback only.
 - **DATA-5** "Today" is the current calendar date at the spot, computed when the dashboard is shown and updated every minute (so a cached forecast moves forward correctly).
 - **DATA-6** On app open, when the app comes back to the foreground, and when the connection comes back: if the stored forecast is older than 1 hour and the device is online, refresh automatically.
+  - *Known limitation:* an app left open in the foreground is not refreshed on its own; after 12 h it shows the OFF-5 message until the user taps refresh, reopens it or switches back to it.
 - **DATA-7** Manual refresh is always possible when online.
 - **DATA-8** Missing values (e.g. a model gap) are treated as "no data" for that hour; a cell with no data at all shows "–" in neutral style.
 
@@ -194,7 +196,7 @@ Data age is always shown as a duration, never as a clock time:
 - **OFF-1** The app shell (HTML, JS, CSS, icons, fonts) is cached by the service worker and opens without network. A new version is installed automatically in the background and used on the next open.
 - **OFF-2** The last successful forecast and the chosen spot are stored on the device and shown immediately on open.
 - **OFF-3** Offline: grey banner "Offline · forecast from AGE" (e.g. "Offline · forecast from 5 h ago").
-- **OFF-4** Failed refresh while online: amber banner "Couldn't update. Showing the forecast from AGE. Tap refresh to try again." No separate Retry button; the header refresh button (DASH-3) is used.
+- **OFF-4** Failed refresh while online: amber banner "Couldn't update. Showing the forecast from AGE. Tap refresh to try again." No separate Retry button; the header refresh button (DASH-3) is used. Going offline clears the failed state: after the connection comes back, no OFF-4 banner is shown until a new refresh fails (the same applies to the "after a failed refresh" wording in OFF-5 and the failed message in OFF-8).
 - **OFF-5** Forecast older than 12 hours (or, as a safeguard, not covering today): **no forecast data is shown**. Instead of the Today/Tomorrow/Next days sections, an amber message: "No current forecast" + "The stored forecast is AGE old." followed by the next step:
   - online: "Tap refresh to load a new one."
   - after a failed refresh: "Couldn't update. Tap refresh to try again."
@@ -251,3 +253,7 @@ Key decisions and the alternatives they replaced, so they aren't reopened by acc
 | 6 forecast days | 5 | A 12 h old forecast still covers all shown days. |
 | Greyed-out past blocks below 4.5:1 contrast | Another way of marking past blocks | Accepted exception for now; review after real-world use. |
 | Inter bundled with the app | Google Fonts | No third-party requests (NFR-5). |
+| Request timeout of 20 s | No timeout; 10 s or 30 s | A stalled connection must not block refreshing forever; 20 s tolerates slow mobile/boat links. |
+| Going offline clears a failed refresh | Retrying automatically on reconnect regardless of age | No extra request; the banner only reports failures since the connection came back. |
+| No auto-refresh while the app stays open | Running the 1 h check every minute | Kept DATA-6 as decided; foreground/open/reconnect cover normal use. |
+| Fixed-offset fallback when the time zone is unknown | Deriving the offset per hour from Unix timestamps | Current target browsers know all zones; documented as a limitation instead. |
