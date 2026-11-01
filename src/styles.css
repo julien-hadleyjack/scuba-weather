@@ -1,0 +1,134 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+:root {
+  /* Colours (wireframe palette) */
+  --c-bg: #eef2f5;
+  --c-surface: #ffffff;
+  --c-border: #d9e1e8;
+  --c-divider: #e3e9ee;
+  --c-text: #0e1a26;
+  --c-text-2: #4a5a6a;
+  --c-text-3: #5f6e7c;
+  --c-primary: #0a5f86;
+  --c-primary-dark: #063f5a;
+  --c-ok-bg: #f4f7f9;
+  --c-ok-fg: #2e4657;
+  --c-marginal-bg: #fff1cc;
+  --c-marginal-fg: #6b4200;
+  --c-marginal-icon: #a86200;
+  --c-poor-bg: #fbdad6;
+  --c-poor-fg: #7e1610;
+  --c-poor-icon: #b42318;
+  --c-info-bg: #e6eef4;
+  --c-good: #1f7a55;
+  --c-tide: #c05a00;
+  --c-night: rgba(30, 43, 56, 0.12);
+  --c-rain-dry: #d9e1e8;
+  --c-rain-drizzle: #c4dcea;
+  --c-rain-light: #8dbbd6;
+  --c-rain-moderate: #3a7fae;
+  --c-rain-heavy: #123f66;
+
+  /* Spacing and radii */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --r-cell: 10px;
+  --r-btn: 12px;
+  --r-card: 14px;
+  --r-sheet: 20px;
+
+  --touch: 44px;
+  --max-width: 480px;
+
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--c-text);
+  background: var(--c-bg);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+}
+
+#app {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--c-bg);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+.icon-btn {
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: var(--r-btn);
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-primary);
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.icon-btn:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

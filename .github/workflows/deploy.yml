@@ -1,4 +1,4 @@
-name: Deploy static content to Pages
+name: Test, build and deploy to Pages
 
 on:
   push:
@@ -18,13 +18,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Type check
+        run: npm run check
+      - name: Test
+        run: npm test
+      - name: Build
+        # vite.config.ts uses a relative base, so the build works under /<repo>/.
+        run: npm run build
       - name: Setup Pages
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v6
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v5
         with:
-          path: '.'
+          path: './dist'
 
   deploy:
     if: github.event_name != 'pull_request'

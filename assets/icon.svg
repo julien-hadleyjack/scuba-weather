@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Scuba Weather</title>
+  <rect width="512" height="512" fill="#0A5F86"/>
+  <path d="M0 336 C 64 306, 128 306, 192 336 S 320 366, 384 336 S 480 306, 512 326 V512 H0 Z" fill="#063F5A"/>
+  <path d="M0 336 C 64 306, 128 306, 192 336 S 320 366, 384 336 S 480 306, 512 326" fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round"/>
+  <g fill="#FFFFFF">
+    <circle cx="192" cy="200" r="50"/>
+    <circle cx="256" cy="168" r="68"/>
+    <circle cx="318" cy="206" r="44"/>
+    <rect x="142" y="200" width="220" height="50" rx="25"/>
+  </g>
+  <g stroke="#8DBBD6" stroke-width="14" stroke-linecap="round">
+    <path d="M206 274 L196 298"/>
+    <path d="M256 274 L246 298"/>
+    <path d="M306 274 L296 298"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="7">
+    <circle cx="346" cy="414" r="16"/>
+    <circle cx="378" cy="388" r="10"/>
+    <circle cx="364" cy="364" r="6"/>
+  </g>
+</svg>
