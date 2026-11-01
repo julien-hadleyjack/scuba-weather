@@ -75,7 +75,7 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
   - night shading for the hours before sunrise and after sunset; no shading when the day has no sunrise or sunset (polar day/night)
   - hour labels every 2 hours (06, 08 … 22), each centered under the bar of the hour it names (the 06 bar is 06:00–06:59)
   - a small key: Tide / Night / Rain per hour
-  - a text alternative per block, e.g. "Afternoon: rain in 3 of 6 hours, peak 14 mm/h at 15:00, tide rising, partly dark"
+  - a text alternative (NFR-3): a description that is **not shown on screen** but read aloud by screen readers such as VoiceOver or TalkBack, so the chart's content is available without seeing it. Technically the `aria-label` of the chart's SVG (`role="img"`). It is one description for the whole chart, made of one sentence per block, joined with ". ", e.g. "Morning: dry, tide falling. Afternoon: rain in 3 of 6 hours, peak 14 mm/h at 15:00, tide rising, partly dark. Night: rain in 6 of 6 hours, peak 1.2 mm/h at 18:00, tide falling, dark"
 - **DASH-8** Below the chart: "Water NN °C" (average sea surface temperature of the hours 06–23, rounded; "–" without data).
 - **DASH-9** Blocks of today that are already over are dimmed (column header, cells and their part of the chart, 45 % opacity), but stay visible. A block counts as over once its last hour has ended in spot local time.
   - *Accessibility exception:* dimmed text falls below the 4.5:1 contrast of NFR-3. Accepted for now as "inactive" content; to be reviewed after real-world use.
@@ -211,7 +211,7 @@ Data age is always shown as a duration, never as a clock time:
 ## 9. Non-functional requirements
 - **NFR-1** Minimum supported width: 400 CSS px. Reference device: Pixel 10 Pro, which reports roughly 410–427 CSS px depending on its "Display size" setting; 400 leaves a small margin. Wider screens get a centred column (max. ~480 px). The longest labels ("Persistent", "Big waves", "1.1 m every 5 s") must not overflow their cells at 400 px.
 - **NFR-2** Supported browsers: current Safari on iOS and current Chrome on Android; installable to the home screen (web manifest, icons, standalone display).
-- **NFR-3** Accessibility: text contrast at least 4.5:1 (exception: DASH-9), touch targets at least 44 px, proper buttons/labels, chart has a text alternative.
+- **NFR-3** Accessibility: text contrast at least 4.5:1 (exception: DASH-9), touch targets at least 44 px, proper buttons/labels, chart has a text alternative for screen readers (not visible on screen, see DASH-7).
 - **NFR-4** Performance: dashboard JavaScript at most 50 kB compressed (map excluded); dashboard renders from cache in under 1 s on a mid-range phone.
 - **NFR-5** Privacy: no analytics, no tracking, no cookies; only Open-Meteo and OpenStreetMap are contacted. The Inter font is therefore bundled with the app (no Google Fonts).
 - **NFR-6** English text, metric units, wind in km/h, 24-hour times.
