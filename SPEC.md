@@ -65,7 +65,7 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
 - **DASH-4** Two sections, "Today" and "Tomorrow", each with the weekday and date of the spot's local calendar day ("Sun 1 Nov"). Both are always fully visible.
 - **DASH-5** Each section has a grid: rows **Rain, Storms, Wind, Waves** × columns **Morning 06–12, Afternoon 12–18, Night 18–24** (spot local time; a block covers the hours starting at 06, 07 … 11 etc.). All three blocks are 6 hours, so the columns are equally wide and the chart below keeps one time scale across the day. Long labels may be hyphenated rather than overflow.
 - **DASH-6** Each cell shows a severity icon, the full label, and optionally a detail line, using the marker style (section 6). Cell contents are defined in section 5.
-- **DASH-7** Below the grid, an hourly chart whose three parts are aligned with the three columns:
+- **DASH-7** Below the grid, one continuous hourly chart (06–24) spanning all three columns, with no gaps between the blocks; thin dashed lines at 12 and 18 mark the block boundaries:
   - rain bars per hour, by intensity:
     - dry (below 0.1 mm/h): a flat grey line
     - drizzle (from 0.1, below 0.5): a very low, pale bar (3 px)
