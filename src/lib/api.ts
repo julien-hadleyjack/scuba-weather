@@ -73,7 +73,15 @@ async function getJson<T>(url: string, f: Fetch, signal?: AbortSignal): Promise<
 
 const num = (v: number | null | undefined): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
-/** Merge both responses into one hourly list keyed by local time. */
+/**
+ * Merge both responses into one hourly list keyed by local time.
+ *
+ * Every `Hour` describes the hour that starts at its time (06:00 = 06:00–06:59,
+ * DATA-9). Open-Meteo gives `precipitation` as the sum and `wind_gusts_10m` as
+ * the maximum of the *preceding* hour, so those two are read from the next
+ * timestamp; all other variables are instant values at the timestamp itself.
+ * The last hour of the forecast has no next timestamp and gets null.
+ */
 export function parseForecast(
   spot: Pick<Spot, 'latitude' | 'longitude'>,
   fc: ForecastResponse,
@@ -90,11 +98,11 @@ export function parseForecast(
       time,
       date: time.slice(0, 10),
       hour: Number(time.slice(11, 13)),
-      precip: num(fc.hourly.precipitation[i]),
+      precip: num(fc.hourly.precipitation[i + 1]),
       code: num(fc.hourly.weather_code[i]),
       cape: num(fc.hourly.cape[i]),
       wind: num(fc.hourly.wind_speed_10m[i]),
-      gust: num(fc.hourly.wind_gusts_10m[i]),
+      gust: num(fc.hourly.wind_gusts_10m[i + 1]),
       dir: num(fc.hourly.wind_direction_10m[i]),
       waveH: mv(marine.hourly.wave_height),
       waveT: mv(marine.hourly.wave_period),

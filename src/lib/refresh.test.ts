@@ -262,10 +262,34 @@ describe('api', () => {
       },
     };
     const f = parseForecast(spot, fc, marine, 123);
-    expect(f.hours[0]).toMatchObject({ hour: 6, precip: 0, waveH: null, sst: null });
+    expect(f.hours[0]).toMatchObject({ hour: 6, waveH: null, sst: null });
     expect(f.hours[1]).toMatchObject({ hour: 7, code: 95, waveH: 0.8, waveT: 5, seaLevel: 0.4, sst: 29.2 });
     expect(f.days[0].sunset).toBe('2026-11-01T17:55');
     expect(f.fetchedAt).toBe(123);
+  });
+
+  it('precipitation and gusts cover the preceding hour, so each hour reads them from the next timestamp (DATA-9)', () => {
+    const fc = {
+      timezone: 'Asia/Bangkok',
+      utc_offset_seconds: 25200,
+      hourly: {
+        time: ['2026-11-01T05:00', '2026-11-01T06:00', '2026-11-01T07:00'],
+        precipitation: [9, 0, 1.2],
+        weather_code: [80, 1, 95],
+        cape: [50, 100, 1500],
+        wind_speed_10m: [5, 10, 12],
+        wind_gusts_10m: [60, 20, 25],
+        wind_direction_10m: [170, 180, 190],
+      },
+      daily: { time: ['2026-11-01'], sunrise: ['2026-11-01T06:10'], sunset: ['2026-11-01T17:55'] },
+    };
+    const marine = { hourly: { time: [], wave_height: [], wave_period: [], sea_level_height_msl: [], sea_surface_temperature: [] } };
+    const [h5, h6, h7] = parseForecast(spot, fc, marine, 0).hours;
+    // 06:00–06:59 rain/gusts are reported at 07:00; instant values stay at their own hour.
+    expect(h6).toMatchObject({ hour: 6, precip: 1.2, gust: 25, code: 1, cape: 100, wind: 10, dir: 180 });
+    expect(h5).toMatchObject({ hour: 5, precip: 0, gust: 20, code: 80 });
+    // The last hour has no following timestamp: no data (DATA-8).
+    expect(h7).toMatchObject({ hour: 7, precip: null, gust: null, code: 95 });
   });
 
   it('search maps results to name and region', async () => {
@@ -322,7 +346,7 @@ describe('api', () => {
     const f = await fetchForecast(spot, ok, () => 42);
     expect(urls).toHaveLength(2);
     expect(f).toMatchObject({ timezone: 'Asia/Bangkok', fetchedAt: 42, latitude: 10 });
-    expect(f.hours[0]).toMatchObject({ precip: 0.2, waveH: 0.5, sst: 29 });
+    expect(f.hours[0]).toMatchObject({ code: 51, waveH: 0.5, sst: 29 });
 
     const marineDown = (async (url: string) =>
       url.includes('marine')

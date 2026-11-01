@@ -73,7 +73,7 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
     - bar height 2.85 px per mm/h, at least 5 px, at most 68 px (68 px ≈ 24 mm/h)
   - the tide as a line through the hourly sea level at 06 … 24 (24 = the next day's 00:00; on the last forecast day the line ends at 23), scaled between the lowest and highest value of the calendar day (00–23) and that 24:00 point; no times or heights shown
   - night shading for the hours before sunrise and after sunset; no shading when the day has no sunrise or sunset (polar day/night)
-  - hour ticks every 2 hours (06, 08 … 24), each label centered on its tick at the hour boundary between bars
+  - hour labels every 2 hours (06, 08 … 22), each centered under the bar of the hour it names (the 06 bar is 06:00–06:59)
   - a small key: Tide / Night / Rain per hour
   - a text alternative per block, e.g. "Afternoon: rain in 3 of 6 hours, peak 14 mm/h at 15:00, tide rising, partly dark"
 - **DASH-8** Below the chart: "Water NN °C" (average sea surface temperature of the hours 06–23, rounded; "–" without data).
@@ -182,6 +182,7 @@ Screen readers hear the severity before the text, e.g. "Marginal, Wind, 24 km/h 
   - *Known limitation:* an app left open in the foreground is not refreshed on its own; after 12 h it shows the OFF-5 message until the user taps refresh, reopens it or switches back to it.
 - **DATA-7** Manual refresh is always possible when online.
 - **DATA-8** Missing values (e.g. a model gap) are treated as "no data" for that hour; a cell with no data at all shows "–" in neutral style.
+- **DATA-9** Every hour in the app means the hour that starts at that time ("06" = 06:00–06:59), in the grid, the chart and the rules. Open-Meteo reports `precipitation` as the sum and `wind_gusts_10m` as the maximum of the *preceding* hour, so the value for 06:00–06:59 is the one at 07:00; all other variables are instant values and are used at their own time. The last forecast hour has no following value and counts as no data (DATA-8).
 
 Open-Meteo's free non-commercial tier (below 10,000 calls a day) needs no API key; the CC BY 4.0 credit is required (DASH-13).
 
