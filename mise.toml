@@ -17,7 +17,8 @@ step() {
   if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::group::$title"; else echo "── $title"; fi
   "$@"
   local status=$?
-  if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::endgroup::"; fi
+  # Workflow commands must start a line; some tools end their output without a newline.
+  if [[ -n ${GITHUB_ACTIONS:-} ]]; then printf '\n::endgroup::\n'; fi
   if ((status)); then
     failed="$failed, $title"
     if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::error title=$title failed::$* exited with $status"; fi
