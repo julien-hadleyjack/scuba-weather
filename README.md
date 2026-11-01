@@ -16,6 +16,7 @@ npm test           # unit, component and accessibility tests (Vitest)
 npm run coverage   # tests with coverage report (text + coverage/index.html)
 npm run check      # svelte-check / TypeScript
 npm run lint       # ESLint + Prettier check (`npm run format` fixes formatting)
+mise run ci        # lint, type check, test and build, as in CI
 npm run build      # production build in dist/ (with service worker)
 npm run preview    # serve dist/ locally
 npm run icons      # re-render PNG icons from public/favicon.svg

@@ -1,3 +1,36 @@
 [tools]
 node = "26.13.0"
 prek = "0.5.9"
+
+[tasks.ci]
+description = "Lint, type check, test and build, as in CI"
+quiet = true
+run = '''
+#!/usr/bin/env bash
+set -uo pipefail
+failed=""
+
+# Each step is a collapsible log group on GitHub Actions; a failure also becomes an annotation.
+step() {
+  local title=$1
+  shift
+  if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::group::$title"; else echo "── $title"; fi
+  "$@"
+  local status=$?
+  if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::endgroup::"; fi
+  if ((status)); then
+    failed="$failed, $title"
+    if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::error title=$title failed::$* exited with $status"; fi
+  fi
+}
+
+step Lint npm run lint
+step "Type check" npm run check
+step Test npm test
+if [[ -z $failed ]]; then step Build npm run build; fi
+
+if [[ -n $failed ]]; then
+  echo "Failed: ${failed#, }" >&2
+  exit 1
+fi
+'''
