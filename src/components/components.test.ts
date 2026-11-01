@@ -95,6 +95,19 @@ describe('DayCard and Outlook', () => {
     expect(screen.getByRole('img', { name: /Afternoon: rain in 1 of 6 hours, peak 14 mm\/h at 14:00/ })).toBeInTheDocument();
   });
 
+  it('draws one continuous chart for the day with 2-hour labels under the bars (DASH-7)', () => {
+    const { container } = render(DayCard, { title: 'Today', day: view.today });
+    const charts = screen.getAllByRole('img').filter((el) => el.tagName.toLowerCase() === 'svg');
+    expect(charts).toHaveLength(1);
+    const name = charts[0].getAttribute('aria-label')!;
+    expect(name).toMatch(/^Morning: .*\. Afternoon: .*\. Night: /);
+    const labels = [...charts[0].querySelectorAll('text')].map((t) => t.textContent);
+    expect(labels).toEqual(['06', '08', '10', '12', '14', '16', '18', '20', '22']);
+    expect(charts[0].querySelectorAll('line.boundary')).toHaveLength(2);
+    // Morning's part of the chart is dimmed on its own
+    expect(container.querySelectorAll('svg g.past')).toHaveLength(1);
+  });
+
   it('outlook shows one row per day', () => {
     const { container } = render(Outlook, { rows: view.outlook });
     expect(screen.getAllByRole('rowheader')).toHaveLength(3);

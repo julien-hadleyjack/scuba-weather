@@ -19,7 +19,7 @@ export interface ChartHour {
 }
 
 export interface DayChart {
-  /** Rain per hour, 06…21. */
+  /** Rain per hour, 06…23. */
   hours: ChartHour[];
   /** Tide, scaled 0 (day's low) … 1 (day's high) at each hour 06…24 (24 = next day 00:00); null = no data. */
   tide: (number | null)[];
