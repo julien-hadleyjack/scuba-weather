@@ -1,5 +1,5 @@
 <script lang="ts">
-  import BlockChart from './BlockChart.svelte';
+  import DayChart from './DayChart.svelte';
   import CellView from './CellView.svelte';
   import { describeBlock } from '../lib/chart-text';
   import { METRICS as rows } from '../lib/classify';
@@ -8,12 +8,6 @@
   import type { DayView } from '../lib/dashboard';
 
   let { title, day }: { title: string; day: DayView } = $props();
-
-  const TICKS: Record<string, number[]> = {
-    morning: [6, 9],
-    afternoon: [12, 15],
-    night: [18, 21, 24],
-  };
 
   let label = $derived(dayLabel(day.date));
   let headingId = $derived(`day-${day.date}`);
@@ -47,21 +41,17 @@
       {/each}
       <div class="row chart-row">
         <div class="chart-labels" aria-hidden="true"><span>Tide</span><span class="rain">Rain</span></div>
-        {#each day.blocks as b (b.id)}
-          {@const hours = day.chart.hours.slice(b.start - DAY_START, b.end - DAY_START)}
-          {@const tide = day.chart.tide.slice(b.start - DAY_START, b.end - DAY_START + 1)}
-          <div class:past={b.past}>
-            <BlockChart
-              start={b.start}
-              end={b.end}
-              {hours}
-              {tide}
-              night={day.chart.night}
-              ticks={TICKS[b.id]}
-              label={describeBlock(b.name, hours, tide, day.chart.night, b.start, b.end)}
-            />
-          </div>
-        {/each}
+        <DayChart
+          chart={day.chart}
+          blocks={day.blocks}
+          label={day.blocks
+            .map((b) => {
+              const hours = day.chart.hours.filter((h) => h.hour >= b.start && h.hour < b.end);
+              const tide = day.chart.tide.slice(b.start - DAY_START, b.end - DAY_START + 1);
+              return describeBlock(b.name, hours, tide, day.chart.night, b.start, b.end);
+            })
+            .join('. ')}
+        />
       </div>
     </div>
 

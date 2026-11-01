@@ -1,4 +1,5 @@
 import type { Forecast, Hour } from '../lib/types';
+import { buildDashboard, type DashboardView } from '../lib/dashboard';
 import { addDays } from '../lib/time';
 
 export function hour(partial: Partial<Hour> = {}): Hour {
@@ -59,4 +60,16 @@ export function forecast(
     hours: hrs,
     days: dayInfo,
   };
+}
+
+/**
+ * Dashboard for 2026-11-01 13:00 at the spot: heavy rain (14 mm) at 14:00 and
+ * thunder at 14:00 and 15:00, so Morning is over and Afternoon is poor.
+ */
+export function sampleDashboard(): DashboardView {
+  const f = forecast('2026-11-01', 5, (h) => ({
+    precip: h.hour === 14 ? 14 : 0,
+    code: h.hour === 14 || h.hour === 15 ? 95 : 1,
+  }));
+  return buildDashboard(f, Date.UTC(2026, 10, 1, 6))!;
 }

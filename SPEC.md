@@ -65,7 +65,7 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
 - **DASH-4** Two sections, "Today" and "Tomorrow", each with the weekday and date of the spot's local calendar day ("Sun 1 Nov"). Both are always fully visible.
 - **DASH-5** Each section has a grid: rows **Rain, Storms, Wind, Waves** × columns **Morning 06–12, Afternoon 12–18, Night 18–24** (spot local time; a block covers the hours starting at 06, 07 … 11 etc.). All three blocks are 6 hours, so the columns are equally wide and the chart below keeps one time scale across the day. Long labels may be hyphenated rather than overflow.
 - **DASH-6** Each cell shows a severity icon, the full label, and optionally a detail line, using the marker style (section 6). Cell contents are defined in section 5.
-- **DASH-7** Below the grid, an hourly chart whose three parts are aligned with the three columns:
+- **DASH-7** Below the grid, one continuous hourly chart (06–24) spanning all three columns, with no gaps between the blocks; thin dashed lines at 12 and 18 mark the block boundaries:
   - rain bars per hour, by intensity:
     - dry (below 0.1 mm/h): a flat grey line
     - drizzle (from 0.1, below 0.5): a very low, pale bar (3 px)
@@ -73,9 +73,9 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
     - bar height 2.85 px per mm/h, at least 5 px, at most 68 px (68 px ≈ 24 mm/h)
   - the tide as a line through the hourly sea level at 06 … 24 (24 = the next day's 00:00; on the last forecast day the line ends at 23), scaled between the lowest and highest value of the calendar day (00–23) and that 24:00 point; no times or heights shown
   - night shading for the hours before sunrise and after sunset; no shading when the day has no sunrise or sunset (polar day/night)
-  - hour ticks (06, 09, 12, 15, 18, 21, 24)
+  - hour labels every 2 hours (06, 08 … 22), each centered under the bar of the hour it names (the 06 bar is 06:00–06:59)
   - a small key: Tide / Night / Rain per hour
-  - a text alternative per block, e.g. "Afternoon: rain in 3 of 6 hours, peak 14 mm/h at 15:00, tide rising, partly dark"
+  - a text alternative (NFR-3): a description that is **not shown on screen** but read aloud by screen readers such as VoiceOver or TalkBack, so the chart's content is available without seeing it. Technically the `aria-label` of the chart's SVG (`role="img"`). It is one description for the whole chart, made of one sentence per block, joined with ". ", e.g. "Morning: dry, tide falling. Afternoon: rain in 3 of 6 hours, peak 14 mm/h at 15:00, tide rising, partly dark. Night: rain in 6 of 6 hours, peak 1.2 mm/h at 18:00, tide falling, dark"
 - **DASH-8** Below the chart: "Water NN °C" (average sea surface temperature of the hours 06–23, rounded; "–" without data).
 - **DASH-9** Blocks of today that are already over are dimmed (column header, cells and their part of the chart, 45 % opacity), but stay visible. A block counts as over once its last hour has ended in spot local time.
   - *Accessibility exception:* dimmed text falls below the 4.5:1 contrast of NFR-3. Accepted for now as "inactive" content; to be reviewed after real-world use.
@@ -176,12 +176,15 @@ Screen readers hear the severity before the text, e.g. "Marginal, Wind, 24 km/h 
   - *Why 6 days:* a forecast up to 12 h old (the most the app shows, OFF-5) must still cover today, tomorrow and the three outlook days after the date has changed at the spot.
 - **DATA-3** Both requests run in parallel. A refresh only counts as successful if both succeed. Any HTTP error, including rate limiting (429), an error in the response, or a request that hasn't completed within **20 seconds** counts as a failed refresh. A timed-out request is cancelled.
 - **DATA-4** All dates and times use the spot's local time zone as returned by the API, independent of the phone's time zone.
+  - *Known limitation:* the API uses one fixed UTC offset (`utc_offset_seconds`, resolved at request time) for every timestamp in the response and ignores daylight-saving changes inside the forecast range. For a spot with DST, all hours after a change in the 6-day range are labelled one hour off (e.g. the Morning block shows 07–13 or 05–11 real time), and night shading and "block is over" (DASH-9) drift by that hour. A refresh after the change fixes it. Accepted for now as an edge case; the fix would be to request `timeformat=unixtime` and convert each timestamp with the spot's IANA time zone.
   - *Known limitation:* if the browser doesn't know the spot's IANA time zone, the app uses the fixed UTC offset returned with the forecast. After a daylight-saving change during the forecast's lifetime, local times are then off by the DST shift until the next refresh. Current iOS Safari and Android Chrome know all zones, so this is a fallback only.
 - **DATA-5** "Today" is the current calendar date at the spot, computed when the dashboard is shown and updated every minute (so a cached forecast moves forward correctly).
 - **DATA-6** On app open, when the app comes back to the foreground, and when the connection comes back: if the stored forecast is older than 1 hour and the device is online, refresh automatically.
   - *Known limitation:* an app left open in the foreground is not refreshed on its own; after 12 h it shows the OFF-5 message until the user taps refresh, reopens it or switches back to it.
 - **DATA-7** Manual refresh is always possible when online.
 - **DATA-8** Missing values (e.g. a model gap) are treated as "no data" for that hour; a cell with no data at all shows "–" in neutral style.
+- **DATA-9** Every hour in the app means the hour that starts at that time ("06" = 06:00–06:59), in the grid, the chart and the rules. Open-Meteo reports `precipitation` as the sum and `wind_gusts_10m` as the maximum of the *preceding* hour, and derives `weather_code` from that precipitation, so for these three the value for 06:00–06:59 is the one at 07:00 (and 23:00–23:59 uses the next day's 00:00). `cape`, wind speed and direction and all marine values are instant values and are used at their own time.
+  - *Known limitation:* the last hour of the forecast (23:00–23:59 on the 6th forecast day) has no following value, so its rain, gusts and weather code count as no data (DATA-8). Today and Tomorrow are never affected. The 6th day is only shown as the last outlook row (after a date change with a cached forecast), where the day is classified from 06–22 for those metrics; this is accepted.
 
 Open-Meteo's free non-commercial tier (below 10,000 calls a day) needs no API key; the CC BY 4.0 credit is required (DASH-13).
 
@@ -208,7 +211,7 @@ Data age is always shown as a duration, never as a clock time:
 ## 9. Non-functional requirements
 - **NFR-1** Minimum supported width: 400 CSS px. Reference device: Pixel 10 Pro, which reports roughly 410–427 CSS px depending on its "Display size" setting; 400 leaves a small margin. Wider screens get a centred column (max. ~480 px). The longest labels ("Persistent", "Big waves", "1.1 m every 5 s") must not overflow their cells at 400 px.
 - **NFR-2** Supported browsers: current Safari on iOS and current Chrome on Android; installable to the home screen (web manifest, icons, standalone display).
-- **NFR-3** Accessibility: text contrast at least 4.5:1 (exception: DASH-9), touch targets at least 44 px, proper buttons/labels, chart has a text alternative.
+- **NFR-3** Accessibility: text contrast at least 4.5:1 (exception: DASH-9), touch targets at least 44 px, proper buttons/labels, chart has a text alternative for screen readers (not visible on screen, see DASH-7).
 - **NFR-4** Performance: dashboard JavaScript at most 50 kB compressed (map excluded); dashboard renders from cache in under 1 s on a mid-range phone.
 - **NFR-5** Privacy: no analytics, no tracking, no cookies; only Open-Meteo and OpenStreetMap are contacted. The Inter font is therefore bundled with the app (no Google Fonts).
 - **NFR-6** English text, metric units, wind in km/h, 24-hour times.
