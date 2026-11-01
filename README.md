@@ -8,37 +8,21 @@ What the app does and why: [SPEC.md](SPEC.md). Wireframes: [view in the browser]
 
 ## Run
 
-Requires Node.js 22 or newer (`.nvmrc` pins the major version).
-
 ```sh
+mise trust && mise install && prek install   # Node, prek and Git hooks
 npm install
 npm run dev        # http://localhost:5173
-npm test           # unit + component tests (Vitest)
+npm test           # unit, component and accessibility tests (Vitest)
 npm run coverage   # tests with coverage report (text + coverage/index.html)
 npm run check      # svelte-check / TypeScript
+npm run lint       # ESLint + Prettier check (`npm run format` fixes formatting)
 npm run build      # production build in dist/ (with service worker)
 npm run preview    # serve dist/ locally
-npm run icons      # re-render PNG icons from assets/icon.svg
-npm run lint       # ESLint
-npm run format     # Prettier (format:check to only check)
+npm run icons      # re-render PNG icons from public/favicon.svg
 ```
 
-With [mise](https://mise.jdx.dev), `mise trust && mise install` sets up Node (version read from
-`.nvmrc`; mise only applies that setting once the folder is trusted) and [prek](https://prek.j178.dev).
-CI installs the same tools from `mise.toml`. Run `prek install` once per clone to enable the Git hooks
-in `prek.toml`: formatting, lint and file checks on commit; type check and tests on push.
-CI runs the same hooks, so a commit made without them is still caught.
-
-## Maintenance
-
-Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/) (`renovate.json`):
-once a week, minor and patch updates (npm, GitHub Actions, Node, prek, lock file) go into one
-branch and are merged into `main` without a PR when CI passes on it; that push deploys the
-site. Failing updates and major versions come as PRs. The Dependency Dashboard issue lists
-everything pending.
-
-The build uses a relative `base`, so `dist/` can be served from a domain root or a
-GitHub Pages project path as-is.
+Pushes to `main` deploy to GitHub Pages. Renovate merges minor and patch dependency updates
+weekly once CI passes; major updates and failures come as PRs.
 
 ## Layout
 

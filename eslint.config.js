@@ -3,10 +3,9 @@ import prettier from 'eslint-config-prettier';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import ts from 'typescript-eslint';
-import svelteConfig from './svelte.config.js';
 
 export default ts.config(
-  { ignores: ['dist/', 'dev-dist/', 'coverage/', 'docs/wireframes/'] },
+  { ignores: ['dist/', 'dev-dist/', 'coverage/'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs.recommended,
@@ -24,7 +23,6 @@ export default ts.config(
         projectService: true,
         extraFileExtensions: ['.svelte'],
         parser: ts.parser,
-        svelteConfig,
       },
     },
   },

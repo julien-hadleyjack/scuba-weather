@@ -236,7 +236,7 @@ Data age is always shown as a duration, never as a clock time:
 - **NFR-5** Privacy: no analytics, no tracking, no cookies; only Open-Meteo and OpenStreetMap are contacted. The Inter font is therefore bundled with the app (no Google Fonts).
 - **NFR-6** English text, metric units, wind in km/h, 24-hour times.
 - **NFR-7** App name "Scuba Weather" (short name the same). Theme colour #0A5F86.
-- **NFR-8** App icon: rain cloud above a wave line with rising bubbles, on ocean blue (source: `assets/icon.svg`). Exported as 192 px and 512 px PNG (also marked maskable; all elements sit inside the safe zone) and a 180 px Apple touch icon (`npm run icons`).
+- **NFR-8** App icon: rain cloud above a wave line with rising bubbles, on ocean blue (source: `public/favicon.svg`). Exported as 192 px and 512 px PNG (also marked maskable; all elements sit inside the safe zone) and a 180 px Apple touch icon (`npm run icons`).
 
 ## 10. Technology
 

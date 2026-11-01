@@ -1,7 +1,7 @@
 name: Test, build and deploy to Pages
 
-# Tests and builds every branch push (this is also what Renovate waits for
-# before merging its branches); only main is deployed to GitHub Pages.
+# Tests and builds every branch push (Renovate waits for this before merging);
+# only main is deployed to GitHub Pages.
 on:
   push:
     branches: ['**']
@@ -10,24 +10,18 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  # A newer push to the same branch cancels the older run, except on main.
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # mise ignores [settings] in untrusted config files; the mise shims for
-      # node and prek re-read the config in every later step too.
+      # mise ignores [settings] (the Node version from .nvmrc) in untrusted folders.
       MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Setup Node and prek (mise.toml, Node version from .nvmrc)
+      - name: Setup Node
         uses: jdx/mise-action@v5
       - name: Cache npm downloads
         uses: actions/cache@v6
@@ -37,8 +31,8 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
       - name: Install dependencies
         run: npm ci
-      - name: Hooks (formatting, lint, file checks)
-        run: prek run --all-files --show-diff-on-failure
+      - name: Lint
+        run: npm run lint
       - name: Type check
         run: npm run check
       - name: Test

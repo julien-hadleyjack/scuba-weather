@@ -1,6 +1,3 @@
-# Local toolchain for mise (https://mise.jdx.dev): `mise trust && mise install`, then `prek install`.
-# Node's version comes from .nvmrc (also used by CI), so it is not repeated here.
-
 [settings]
 idiomatic_version_file_enable_tools = ["node"]
 
