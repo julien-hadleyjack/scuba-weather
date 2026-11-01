@@ -19,24 +19,39 @@ npm run check      # svelte-check / TypeScript
 npm run build      # production build in dist/ (with service worker)
 npm run preview    # serve dist/ locally
 npm run icons      # re-render PNG icons from assets/icon.svg
+npm run lint       # ESLint
+npm run format     # Prettier (format:check to only check)
 ```
+
+With [mise](https://mise.jdx.dev), `mise install` sets up Node (version read from `.nvmrc`)
+and [prek](https://prek.j178.dev). Run `prek install` once per clone to enable the Git hooks
+in `prek.toml`: formatting, lint and file checks on commit; type check and tests on push.
+CI runs the same hooks, so a commit made without them is still caught.
+
+## Maintenance
+
+Dependencies are kept up to date by [Renovate](https://docs.renovatebot.com/) (`renovate.json`):
+once a week, minor and patch updates (npm, GitHub Actions, Node, prek, lock file) go into one
+branch and are merged into `main` without a PR when CI passes on it; that push deploys the
+site. Failing updates and major versions come as PRs. The Dependency Dashboard issue lists
+everything pending.
 
 The build uses a relative `base`, so `dist/` can be served from a domain root or a
 GitHub Pages project path as-is.
 
 ## Layout
 
-| Path | What |
-|---|---|
-| `src/lib/thresholds.ts` | All classification constants (rain, CAPE, wind, waves, blocks, refresh ages) |
-| `src/lib/classify.ts` | Pure classification rules (§4) |
-| `src/lib/dashboard.ts` | Forecast → Today/Tomorrow/Next days view model, past-block dimming, chart data |
-| `src/lib/time.ts` | Spot-local time helpers (all times use the spot's time zone) |
-| `src/lib/status.ts` | Auto-refresh rule and banner priority (OFF-3…OFF-7) |
-| `src/lib/api.ts` | Open-Meteo Forecast, Marine and Geocoding clients |
-| `src/lib/storage.ts` | Spot + last forecast in `localStorage` |
-| `src/lib/app-state.svelte.ts` | App state and refresh behaviour |
-| `src/components/` | Dashboard, day grid, hourly chart, outlook, banners, spot picker (lazy, with Leaflet) |
+| Path                          | What                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
+| `src/lib/thresholds.ts`       | All classification constants (rain, CAPE, wind, waves, blocks, refresh ages)          |
+| `src/lib/classify.ts`         | Pure classification rules (§4)                                                        |
+| `src/lib/dashboard.ts`        | Forecast → Today/Tomorrow/Next days view model, past-block dimming, chart data        |
+| `src/lib/time.ts`             | Spot-local time helpers (all times use the spot's time zone)                          |
+| `src/lib/status.ts`           | Auto-refresh rule and banner priority (OFF-3…OFF-7)                                   |
+| `src/lib/api.ts`              | Open-Meteo Forecast, Marine and Geocoding clients                                     |
+| `src/lib/storage.ts`          | Spot + last forecast in `localStorage`                                                |
+| `src/lib/app-state.svelte.ts` | App state and refresh behaviour                                                       |
+| `src/components/`             | Dashboard, day grid, hourly chart, outlook, banners, spot picker (lazy, with Leaflet) |
 
 ## Data and credits
 

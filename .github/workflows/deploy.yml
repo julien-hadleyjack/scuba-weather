@@ -1,17 +1,19 @@
 name: Test, build and deploy to Pages
 
-# Tests and builds every branch; only main is deployed to GitHub Pages.
+# Tests and builds every branch push (this is also what Renovate waits for
+# before merging its branches); only main is deployed to GitHub Pages.
 on:
   push:
-    branches: ["**"]
-  pull_request:
-    branches: ["main"]
+    branches: ['**']
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+concurrency:
+  # A newer push to the same branch cancels the older run, except on main.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -19,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
@@ -26,6 +30,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Hooks (formatting, lint, file checks)
+        uses: j178/prek-action@v3
       - name: Type check
         run: npm run check
       - name: Test
@@ -33,9 +39,6 @@ jobs:
       - name: Build
         # vite.config.ts uses a relative base, so the build works under /<repo>/.
         run: npm run build
-      - name: Setup Pages
-        if: github.ref == 'refs/heads/main'
-        uses: actions/configure-pages@v6
       - name: Upload artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
@@ -45,8 +48,11 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     concurrency:
-      group: "pages"
+      group: 'pages'
       cancel-in-progress: false
     environment:
       name: github-pages

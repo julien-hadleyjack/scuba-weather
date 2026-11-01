@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":maintainLockFilesWeekly",
+    "group:allNonMajor",
+    "schedule:weekly"
+  ],
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Non-major updates merge straight into main (no PR) once CI on the branch is green; a failing branch becomes a PR.",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest", "lockFileMaintenance"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Keep @types/node on the Node major from .nvmrc.",
+      "matchPackageNames": ["@types/node"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "automerge": true,
+    "automergeType": "branch",
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"]
+  }
+}
