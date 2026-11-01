@@ -11,9 +11,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "icons": "node scripts/icons.mjs",
     "coverage": "vitest run --coverage",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -40,6 +39,7 @@
     "vite": "^8.3.5",
     "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.5",
+    "vitest-axe": "^0.1.0",
     "workbox-window": "^7.4.1"
   },
   "dependencies": {
@@ -49,5 +49,12 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 100,
+    "plugins": [
+      "prettier-plugin-svelte"
+    ]
   }
 }

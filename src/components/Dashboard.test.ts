@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
+import { axe } from 'vitest-axe';
 import Dashboard from './Dashboard.svelte';
 import { AppState, type Deps } from '../lib/app-state.svelte';
 import { forecast } from '../test/helpers';
@@ -145,6 +146,21 @@ describe('Dashboard', () => {
     it('idle', () => {
       show(app(null));
       expect(screen.getByText('No forecast yet. Tap refresh to load one.')).toBeInTheDocument();
+    });
+  });
+
+  describe('accessibility (axe)', () => {
+    it('with a forecast', async () => {
+      show(app({ ...forecast(), fetchedAt: NOW - HOUR }));
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
+    it('offline, with a banner', async () => {
+      show(app({ ...forecast(), fetchedAt: NOW - HOUR }, { online: () => false }));
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
+    it('without a forecast', async () => {
+      show(app(null));
+      expect(await axe(document.body)).toHaveNoViolations();
     });
   });
 });

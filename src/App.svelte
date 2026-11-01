@@ -42,7 +42,7 @@
 
 {#if screen === 'spot'}
   {#await loadPicker()}
-    <p class="loading">Loading map…</p>
+    <main><p class="loading">Loading map…</p></main>
   {:then { default: SpotPicker }}
     <SpotPicker
       initial={app.spot}
@@ -51,7 +51,9 @@
       onBack={app.spot ? () => (screen = 'dashboard') : undefined}
     />
   {:catch}
-    <p class="loading">The map couldn't be loaded. Check your connection and reopen the app.</p>
+    <main>
+      <p class="loading">The map couldn't be loaded. Check your connection and reopen the app.</p>
+    </main>
   {/await}
 {:else}
   <Dashboard {app} onChangeSpot={() => (screen = 'spot')} />

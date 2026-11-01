@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { axe } from 'vitest-axe';
 import { maps } from '../test/leaflet-mock';
 import type { Place, Spot } from '../lib/types';
 
@@ -287,6 +288,24 @@ describe('SpotPicker', () => {
       screen.getByText('You are offline. Choosing a spot needs a connection.'),
     ).toBeInTheDocument();
     expect(t.useBtn).toBeDisabled();
+  });
+
+  describe('accessibility (axe)', () => {
+    it('before searching', async () => {
+      setup();
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
+    it('with search results open', async () => {
+      const { input } = setup();
+      await type(input, 'koh');
+      await screen.findAllByRole('option');
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
+    it('with a place chosen', async () => {
+      const { input } = setup();
+      await pickFirst(input);
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
   });
 
   it('removes the map when closed', () => {

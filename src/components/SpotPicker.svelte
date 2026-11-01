@@ -194,7 +194,7 @@
   });
 </script>
 
-<div class="screen">
+<main class="screen">
   <header class="header">
     <div class="bar">
       {#if onBack}
@@ -324,7 +324,7 @@
       </button>
     </div>
   {/if}
-</div>
+</main>
 
 <style>
   .screen {

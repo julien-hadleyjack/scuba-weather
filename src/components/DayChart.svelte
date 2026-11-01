@@ -126,7 +126,6 @@
 <style>
   .chart {
     min-width: 0;
-    grid-column: 2 / -1;
   }
   svg {
     display: block;
