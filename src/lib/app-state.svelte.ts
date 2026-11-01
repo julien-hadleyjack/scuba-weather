@@ -62,7 +62,8 @@ export class AppState {
   async autoRefresh(): Promise<void> {
     this.tick();
     if (!this.spot) return;
-    if (shouldAutoRefresh(this.forecast?.fetchedAt ?? null, this.now, this.online)) await this.refresh();
+    if (shouldAutoRefresh(this.forecast?.fetchedAt ?? null, this.now, this.online))
+      await this.refresh();
   }
 
   /** Manual or automatic refresh. Only counts when both requests succeed. */

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":maintainLockFilesWeekly",
+    "group:allNonMajor",
+    "schedule:weekly"
+  ],
+  "description": "Weekly updates for npm, GitHub Actions and mise tools (Node: LTS releases only). Everything merges straight into main without a PR once CI passes on the branch; failing updates become PRs.",
+  "enabledManagers": ["npm", "github-actions", "mise"],
+  "minimumReleaseAge": "3 days",
+  "automerge": true,
+  "automergeType": "branch",
+  "lockFileMaintenance": {
+    "automerge": true,
+    "automergeType": "branch"
+  },
+  "vulnerabilityAlerts": {
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"]
+  }
+}

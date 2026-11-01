@@ -8,35 +8,37 @@ What the app does and why: [SPEC.md](SPEC.md). Wireframes: [view in the browser]
 
 ## Run
 
-Requires Node.js 22 or newer (`.nvmrc` pins the major version).
-
 ```sh
+mise install && prek install   # Node, prek and Git hooks
 npm install
 npm run dev        # http://localhost:5173
-npm test           # unit + component tests (Vitest)
+npm test           # unit, component and accessibility tests (Vitest)
 npm run coverage   # tests with coverage report (text + coverage/index.html)
 npm run check      # svelte-check / TypeScript
+npm run lint       # all prek hooks on all files (formatting, ESLint, file checks)
+npm run format     # Prettier only
+mise run ci        # lint, type check, test and build, as in CI
 npm run build      # production build in dist/ (with service worker)
 npm run preview    # serve dist/ locally
-npm run icons      # re-render PNG icons from assets/icon.svg
+npm run icons      # re-render PNG icons from public/favicon.svg
 ```
 
-The build uses a relative `base`, so `dist/` can be served from a domain root or a
-GitHub Pages project path as-is.
+Pushes to `main` deploy to GitHub Pages. Renovate updates all dependencies weekly (Node: latest
+LTS) and merges them into `main` once CI passes; failing updates come as PRs.
 
 ## Layout
 
-| Path | What |
-|---|---|
-| `src/lib/thresholds.ts` | All classification constants (rain, CAPE, wind, waves, blocks, refresh ages) |
-| `src/lib/classify.ts` | Pure classification rules (§4) |
-| `src/lib/dashboard.ts` | Forecast → Today/Tomorrow/Next days view model, past-block dimming, chart data |
-| `src/lib/time.ts` | Spot-local time helpers (all times use the spot's time zone) |
-| `src/lib/status.ts` | Auto-refresh rule and banner priority (OFF-3…OFF-7) |
-| `src/lib/api.ts` | Open-Meteo Forecast, Marine and Geocoding clients |
-| `src/lib/storage.ts` | Spot + last forecast in `localStorage` |
-| `src/lib/app-state.svelte.ts` | App state and refresh behaviour |
-| `src/components/` | Dashboard, day grid, hourly chart, outlook, banners, spot picker (lazy, with Leaflet) |
+| Path                          | What                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
+| `src/lib/thresholds.ts`       | All classification constants (rain, CAPE, wind, waves, blocks, refresh ages)          |
+| `src/lib/classify.ts`         | Pure classification rules (§4)                                                        |
+| `src/lib/dashboard.ts`        | Forecast → Today/Tomorrow/Next days view model, past-block dimming, chart data        |
+| `src/lib/time.ts`             | Spot-local time helpers (all times use the spot's time zone)                          |
+| `src/lib/status.ts`           | Auto-refresh rule and banner priority (OFF-3…OFF-7)                                   |
+| `src/lib/api.ts`              | Open-Meteo Forecast, Marine and Geocoding clients                                     |
+| `src/lib/storage.ts`          | Spot + last forecast in `localStorage`                                                |
+| `src/lib/app-state.svelte.ts` | App state and refresh behaviour                                                       |
+| `src/components/`             | Dashboard, day grid, hourly chart, outlook, banners, spot picker (lazy, with Leaflet) |
 
 ## Data and credits
 

@@ -22,7 +22,11 @@ export function hour(partial: Partial<Hour> = {}): Hour {
 }
 
 /** n hours with the given overrides, hour numbers starting at `start`. */
-export function hours(n: number, partial: Partial<Hour> | ((i: number) => Partial<Hour>), start = 6): Hour[] {
+export function hours(
+  n: number,
+  partial: Partial<Hour> | ((i: number) => Partial<Hour>),
+  start = 6,
+): Hour[] {
   return Array.from({ length: n }, (_, i) => {
     const p = typeof partial === 'function' ? partial(i) : partial;
     const h = start + i;

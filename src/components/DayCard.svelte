@@ -39,19 +39,24 @@
           {/each}
         </div>
       {/each}
-      <div class="row chart-row">
-        <div class="chart-labels" aria-hidden="true"><span>Tide</span><span class="rain">Rain</span></div>
-        <DayChart
-          chart={day.chart}
-          blocks={day.blocks}
-          label={day.blocks
-            .map((b) => {
-              const hours = day.chart.hours.filter((h) => h.hour >= b.start && h.hour < b.end);
-              const tide = day.chart.tide.slice(b.start - DAY_START, b.end - DAY_START + 1);
-              return describeBlock(b.name, hours, tide, day.chart.night, b.start, b.end);
-            })
-            .join('. ')}
-        />
+      <div class="row" role="row">
+        <div class="chart-labels" role="rowheader">
+          <span class="visually-hidden">Tide and rain</span>
+          <span aria-hidden="true">Tide</span><span class="rain" aria-hidden="true">Rain</span>
+        </div>
+        <div class="chart-cell" role="cell" aria-colspan={day.blocks.length}>
+          <DayChart
+            chart={day.chart}
+            blocks={day.blocks}
+            label={day.blocks
+              .map((b) => {
+                const hours = day.chart.hours.filter((h) => h.hour >= b.start && h.hour < b.end);
+                const tide = day.chart.tide.slice(b.start - DAY_START, b.end - DAY_START + 1);
+                return describeBlock(b.name, hours, tide, day.chart.night, b.start, b.end);
+              })
+              .join('. ')}
+          />
+        </div>
       </div>
     </div>
 
@@ -134,6 +139,9 @@
   }
   .past {
     opacity: 0.45;
+  }
+  .chart-cell {
+    grid-column: 2 / -1;
   }
   .chart-labels {
     display: flex;

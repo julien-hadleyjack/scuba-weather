@@ -24,11 +24,7 @@
         })
       : null,
   );
-  let updated = $derived(
-    forecast
-      ? `Updated ${ago(forecast.fetchedAt, app.now)}`
-      : null,
-  );
+  let updated = $derived(forecast ? `Updated ${ago(forecast.fetchedAt, app.now)}` : null);
   let dot = $derived(!app.online ? 'grey' : banner ? 'amber' : 'green');
 </script>
 
@@ -68,7 +64,10 @@
       {#if app.refreshing}
         <p>Loading forecast…</p>
       {:else if !app.online}
-        <p><strong>Offline.</strong> No forecast stored for this spot yet. It will load when you're back online.</p>
+        <p>
+          <strong>Offline.</strong> No forecast stored for this spot yet. It will load when you're back
+          online.
+        </p>
       {:else if app.failed}
         <p><strong>Couldn't load the forecast.</strong> Tap refresh to try again.</p>
       {:else}
@@ -90,17 +89,26 @@
 <footer class="footer">
   <div class="legend" aria-label="Marker key">
     <span class="ok"><Icon name="check" size={14} />OK</span>
-    <span><Icon name="triangle" size={14} color="var(--c-marginal-icon)" strokeWidth={2.2} />Marginal</span>
+    <span
+      ><Icon
+        name="triangle"
+        size={14}
+        color="var(--c-marginal-icon)"
+        strokeWidth={2.2}
+      />Marginal</span
+    >
     <span><Icon name="octagon" size={14} color="var(--c-poor-icon)" strokeWidth={2.2} />Poor</span>
   </div>
   <p>
-    Rain timing is approximate, especially for tropical downpours. Waves are open-water values on a grid of about
-    8 km; sheltered bays may be calmer, exposed points rougher. Tides are model-based. Not a safety tool: the dive
-    operator decides.
+    Rain timing is approximate, especially for tropical downpours. Waves are open-water values on a
+    grid of about 8 km; sheltered bays may be calmer, exposed points rougher. Tides are model-based.
+    Not a safety tool: the dive operator decides.
   </p>
   <p>
     Weather data: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
-    (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)
+    (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener"
+      >CC BY 4.0</a
+    >)
   </p>
 </footer>
 

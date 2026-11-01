@@ -1,7 +1,9 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/svelte';
-import { afterEach } from 'vitest';
+import { afterEach, expect } from 'vitest';
+import * as axeMatchers from 'vitest-axe/matchers';
 
+expect.extend(axeMatchers);
 afterEach(() => cleanup());
 
 // jsdom has no ResizeObserver (used by bind:clientWidth).

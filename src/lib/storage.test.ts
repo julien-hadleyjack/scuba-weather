@@ -3,7 +3,12 @@ import { loadForecast, loadSpot, sameSpot, saveForecast, saveSpot } from './stor
 import { forecast } from '../test/helpers';
 import type { Spot } from './types';
 
-const spot: Spot = { name: 'Chalok Bay', region: 'Surat Thani, Thailand', latitude: 10, longitude: 99.8 };
+const spot: Spot = {
+  name: 'Chalok Bay',
+  region: 'Surat Thani, Thailand',
+  latitude: 10,
+  longitude: 99.8,
+};
 
 describe('storage', () => {
   beforeEach(() => {

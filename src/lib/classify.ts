@@ -31,7 +31,8 @@ export function classifyRain(hours: Hour[]): Cell {
 
   if (peak < T.DRIZZLE_HOUR_MM) return { severity: 'ok', label: 'Dry', short: 'Dry' };
   if (rainy === 0) return { severity: 'ok', label: 'Drizzle', short: 'Drizzle' };
-  if (peak >= T.RAIN_PEAK_POOR) return { severity: 'poor', label: 'Bursts', detail, short: 'Bursts' };
+  if (peak >= T.RAIN_PEAK_POOR)
+    return { severity: 'poor', label: 'Bursts', detail, short: 'Bursts' };
   if (rainy / amounts.length >= T.PERSISTENT_SHARE) {
     return { severity: 'marginal', label: 'Persistent', detail, short: 'Persistent' };
   }
@@ -53,7 +54,8 @@ export function classifyStorms(hours: Hour[]): Cell {
     return { severity: 'poor', label: 'Likely', detail, short: 'Likely' };
   }
   const possible = hours.some(
-    (h) => h.precip !== null && h.precip >= T.RAINY_HOUR_MM && h.cape !== null && h.cape >= T.STORM_CAPE,
+    (h) =>
+      h.precip !== null && h.precip >= T.RAINY_HOUR_MM && h.cape !== null && h.cape >= T.STORM_CAPE,
   );
   if (possible) return { severity: 'marginal', label: 'Possible', short: 'Possible' };
   return { severity: 'ok', label: 'None', short: 'None' };
@@ -139,7 +141,8 @@ export function classifyWaves(hours: Hour[]): Cell {
   // Worst hour; among equals the highest wave.
   let worst = rated[0];
   for (const r of rated) {
-    if (RANK[r.severity] > RANK[worst.severity] || (r.severity === worst.severity && r.h > worst.h)) worst = r;
+    if (RANK[r.severity] > RANK[worst.severity] || (r.severity === worst.severity && r.h > worst.h))
+      worst = r;
   }
   if (worst.severity === 'ok') return { severity: 'ok', label: 'OK', short: 'OK' };
 

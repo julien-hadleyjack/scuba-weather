@@ -1,11 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
+import { axe } from 'vitest-axe';
 import Dashboard from './Dashboard.svelte';
 import { AppState, type Deps } from '../lib/app-state.svelte';
 import { forecast } from '../test/helpers';
 import type { Forecast, Spot } from '../lib/types';
 
-const spot: Spot = { name: 'Chalok Bay', region: 'Surat Thani, Thailand', latitude: 10, longitude: 99.8 };
+const spot: Spot = {
+  name: 'Chalok Bay',
+  region: 'Surat Thani, Thailand',
+  latitude: 10,
+  longitude: 99.8,
+};
 // 2026-11-01 12:00 at the spot (UTC+7)
 const NOW = Date.UTC(2026, 10, 1, 5);
 const HOUR = 3_600_000;
@@ -39,7 +45,10 @@ describe('Dashboard', () => {
     expect(screen.getByRole('heading', { name: 'Tomorrow' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Next days' })).toBeInTheDocument();
     expect(screen.getByText(/Not a safety tool/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open-Meteo' })).toHaveAttribute('href', 'https://open-meteo.com/');
+    expect(screen.getByRole('link', { name: 'Open-Meteo' })).toHaveAttribute(
+      'href',
+      'https://open-meteo.com/',
+    );
     expect(screen.queryByRole('status')).toBeNull();
   });
 
@@ -64,7 +73,10 @@ describe('Dashboard', () => {
   });
 
   it('failed refresh shows the amber banner (OFF-4)', async () => {
-    const a = app({ ...forecast(), fetchedAt: NOW - 3 * HOUR }, { fetchForecast: () => Promise.reject(new Error('x')) });
+    const a = app(
+      { ...forecast(), fetchedAt: NOW - 3 * HOUR },
+      { fetchForecast: () => Promise.reject(new Error('x')) },
+    );
     show(a);
     await a.refresh();
     expect(await screen.findByRole('status')).toHaveTextContent(
@@ -81,7 +93,9 @@ describe('Dashboard', () => {
   it('forecast older than 12 h: message instead of data (OFF-5)', () => {
     show(app({ ...forecast(), fetchedAt: NOW - 13 * HOUR }));
     expect(screen.getByText('No current forecast')).toBeInTheDocument();
-    expect(screen.getByRole('status')).toHaveTextContent('The stored forecast is 13 h old. Tap refresh to load a new one.');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'The stored forecast is 13 h old. Tap refresh to load a new one.',
+    );
     expect(screen.queryByRole('heading', { name: 'Today' })).toBeNull();
     expect(screen.getAllByRole('status')).toHaveLength(1);
   });
@@ -89,7 +103,9 @@ describe('Dashboard', () => {
   it('stale and offline: one message, no offline banner', () => {
     show(app({ ...forecast(), fetchedAt: NOW - 13 * HOUR }, { online: () => false }));
     expect(screen.getAllByRole('status')).toHaveLength(1);
-    expect(screen.getByRole('status')).toHaveTextContent('Connect to the internet to load a new one.');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Connect to the internet to load a new one.',
+    );
   });
 
   it('exactly 12 h old is still shown', () => {
@@ -130,6 +146,21 @@ describe('Dashboard', () => {
     it('idle', () => {
       show(app(null));
       expect(screen.getByText('No forecast yet. Tap refresh to load one.')).toBeInTheDocument();
+    });
+  });
+
+  describe('accessibility (axe)', () => {
+    it('with a forecast', async () => {
+      show(app({ ...forecast(), fetchedAt: NOW - HOUR }));
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
+    it('offline, with a banner', async () => {
+      show(app({ ...forecast(), fetchedAt: NOW - HOUR }, { online: () => false }));
+      expect(await axe(document.body)).toHaveNoViolations();
+    });
+    it('without a forecast', async () => {
+      show(app(null));
+      expect(await axe(document.body)).toHaveNoViolations();
     });
   });
 });

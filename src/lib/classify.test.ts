@@ -15,12 +15,19 @@ const rain = (...mm: (number | null)[]) => hours(mm.length, (i) => ({ precip: mm
 
 describe('rain', () => {
   it('Dry when no hour reaches 0.1 mm', () => {
-    expect(classifyRain(rain(0, 0, 0.09, 0, 0, 0))).toEqual({ severity: 'ok', label: 'Dry', short: 'Dry' });
+    expect(classifyRain(rain(0, 0, 0.09, 0, 0, 0))).toEqual({
+      severity: 'ok',
+      label: 'Dry',
+      short: 'Dry',
+    });
   });
 
   it('Drizzle at exactly 0.1 mm, still drizzle at 0.49', () => {
     expect(classifyRain(rain(0.1, 0, 0, 0, 0, 0)).label).toBe('Drizzle');
-    expect(classifyRain(rain(0.49, 0.4, 0.4, 0.4, 0.4, 0.4))).toMatchObject({ label: 'Drizzle', severity: 'ok' });
+    expect(classifyRain(rain(0.49, 0.4, 0.4, 0.4, 0.4, 0.4))).toMatchObject({
+      label: 'Drizzle',
+      severity: 'ok',
+    });
   });
 
   it('a 0.5 mm hour is a rainy hour (Showers)', () => {
@@ -30,8 +37,14 @@ describe('rain', () => {
 
   it('Showers become marginal at a peak of exactly 2.5 mm/h', () => {
     expect(classifyRain(rain(2.4, 0, 0, 0, 0, 0)).severity).toBe('ok');
-    expect(classifyRain(rain(2.5, 0, 0, 0, 0, 0))).toMatchObject({ label: 'Showers', severity: 'marginal' });
-    expect(classifyRain(rain(7.5, 0, 0, 0, 0, 0))).toMatchObject({ label: 'Showers', severity: 'marginal' });
+    expect(classifyRain(rain(2.5, 0, 0, 0, 0, 0))).toMatchObject({
+      label: 'Showers',
+      severity: 'marginal',
+    });
+    expect(classifyRain(rain(7.5, 0, 0, 0, 0, 0))).toMatchObject({
+      label: 'Showers',
+      severity: 'marginal',
+    });
   });
 
   it('Persistent when rainy hours are exactly half of the block', () => {
@@ -45,8 +58,14 @@ describe('rain', () => {
 
   it('Persistent below a 7.6 peak, Bursts from exactly 7.6', () => {
     expect(classifyRain(rain(7.5, 1, 1, 1, 0, 0)).label).toBe('Persistent');
-    expect(classifyRain(rain(7.6, 0, 0, 0, 0, 0))).toMatchObject({ label: 'Bursts', severity: 'poor' });
-    expect(classifyRain(rain(14, 1, 1, 1, 1, 1))).toMatchObject({ label: 'Bursts', detail: 'peak 14 mm/h' });
+    expect(classifyRain(rain(7.6, 0, 0, 0, 0, 0))).toMatchObject({
+      label: 'Bursts',
+      severity: 'poor',
+    });
+    expect(classifyRain(rain(14, 1, 1, 1, 1, 1))).toMatchObject({
+      label: 'Bursts',
+      detail: 'peak 14 mm/h',
+    });
   });
 
   it('ignores missing hours and shows "–" without any data', () => {
@@ -75,7 +94,12 @@ describe('storms', () => {
 
   it.each([95, 96, 99])('Likely with weather code %i and the hour range', (code) => {
     const hrs = hours(6, (i) => ({ code: i === 2 || i === 3 ? code : 3 }), 12);
-    expect(classifyStorms(hrs)).toEqual({ severity: 'poor', label: 'Likely', detail: '14–16', short: 'Likely' });
+    expect(classifyStorms(hrs)).toEqual({
+      severity: 'poor',
+      label: 'Likely',
+      detail: '14–16',
+      short: 'Likely',
+    });
   });
 
   it('other codes (e.g. 82 violent showers) are not thunder', () => {
@@ -93,7 +117,11 @@ describe('storms', () => {
 
 describe('wind', () => {
   it('OK below all thresholds', () => {
-    expect(classifyWind(hours(6, { wind: 19.9, gust: 34.9 }))).toEqual({ severity: 'ok', label: 'OK', short: 'OK' });
+    expect(classifyWind(hours(6, { wind: 19.9, gust: 34.9 }))).toEqual({
+      severity: 'ok',
+      label: 'OK',
+      short: 'OK',
+    });
   });
 
   it('marginal at exactly 20 km/h sustained or 35 km/h gusts', () => {
@@ -108,7 +136,11 @@ describe('wind', () => {
   });
 
   it('uses the strongest hour and formats the detail', () => {
-    const hrs = hours(6, (i) => ({ wind: [10, 24.4, 12, 8, 8, 8][i], gust: [20, 41, 22, 15, 15, 15][i], dir: 225 }));
+    const hrs = hours(6, (i) => ({
+      wind: [10, 24.4, 12, 8, 8, 8][i],
+      gust: [20, 41, 22, 15, 15, 15][i],
+      dir: 225,
+    }));
     expect(classifyWind(hrs)).toEqual({
       severity: 'marginal',
       label: 'Wind',
@@ -118,7 +150,11 @@ describe('wind', () => {
   });
 
   it('direction comes from the hour with the strongest sustained wind', () => {
-    const hrs = hours(3, (i) => ({ wind: [12, 25, 18][i], gust: [40, 30, 20][i], dir: [0, 90, 180][i] }));
+    const hrs = hours(3, (i) => ({
+      wind: [12, 25, 18][i],
+      gust: [40, 30, 20][i],
+      dir: [0, 90, 180][i],
+    }));
     expect(classifyWind(hrs).detail).toBe('25 km/h E gusts 40');
   });
 
@@ -144,7 +180,9 @@ describe('direction helpers', () => {
 
   it('strongest hour: earliest wins a tie; gusts are used without sustained data', () => {
     expect(strongestDirection(hours(2, (i) => ({ wind: 20, dir: [10, 200][i] })))).toBe(10);
-    expect(strongestDirection(hours(2, (i) => ({ wind: null, gust: [30, 50][i], dir: [10, 200][i] })))).toBe(200);
+    expect(
+      strongestDirection(hours(2, (i) => ({ wind: null, gust: [30, 50][i], dir: [10, 200][i] }))),
+    ).toBe(200);
     expect(strongestDirection([])).toBeNull();
   });
 });
@@ -185,13 +223,22 @@ describe('waves', () => {
   });
 
   it('missing period uses the height rule only', () => {
-    expect(classifyWaves(hours(2, { waveH: 1.2, waveT: null }))).toMatchObject({ label: 'Big waves' });
+    expect(classifyWaves(hours(2, { waveH: 1.2, waveT: null }))).toMatchObject({
+      label: 'Big waves',
+    });
     expect(classifyWaves(hours(2, { waveH: 0.9, waveT: null })).label).toBe('OK');
   });
 
   it('the worst hour of the window wins', () => {
-    const hrs = hours(6, (i) => ({ waveH: [0.3, 0.4, 1.3, 0.5, 2.2, 0.5][i], waveT: [9, 9, 5, 9, 15, 9][i] }));
-    expect(classifyWaves(hrs)).toMatchObject({ severity: 'poor', label: 'Big waves', detail: '2.2 m' });
+    const hrs = hours(6, (i) => ({
+      waveH: [0.3, 0.4, 1.3, 0.5, 2.2, 0.5][i],
+      waveT: [9, 9, 5, 9, 15, 9][i],
+    }));
+    expect(classifyWaves(hrs)).toMatchObject({
+      severity: 'poor',
+      label: 'Big waves',
+      detail: '2.2 m',
+    });
   });
 
   it('OK and no data', () => {

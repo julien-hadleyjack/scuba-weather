@@ -33,7 +33,9 @@
   let input: HTMLInputElement;
 
   // ---- chosen place and pin ----
-  let place = $state<{ name: string; region: string } | null>(start ? { name: start.name, region: start.region } : null);
+  let place = $state<{ name: string; region: string } | null>(
+    start ? { name: start.name, region: start.region } : null,
+  );
   let center = $state<{ lat: number; lng: number }>(
     start ? { lat: start.latitude, lng: start.longitude } : { lat: 10, lng: 100 },
   );
@@ -130,7 +132,12 @@
 
   async function use() {
     if (!place || check === 'checking' || check === 'land') return;
-    const spot = { name: place.name, region: place.region, latitude: center.lat, longitude: center.lng };
+    const spot = {
+      name: place.name,
+      region: place.region,
+      latitude: center.lat,
+      longitude: center.lng,
+    };
     checkAbort = new AbortController();
     check = 'checking';
     try {
@@ -158,7 +165,8 @@
     map.attributionControl.setPrefix(false);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
     }).addTo(map);
     map.on('movestart', () => {
       checkAbort?.abort();
@@ -186,15 +194,19 @@
   });
 </script>
 
-<div class="screen">
+<main class="screen">
   <header class="header">
     <div class="bar">
       {#if onBack}
-        <button class="back" aria-label="Back to dashboard" onclick={onBack}><Icon name="back" size={22} /></button>
+        <button class="back" aria-label="Back to dashboard" onclick={onBack}
+          ><Icon name="back" size={22} /></button
+        >
       {/if}
       <h1>Choose dive spot</h1>
     </div>
-    <label for="place-search" class="label" id="place-search-label">Search a place, island or dive site</label>
+    <label for="place-search" class="label" id="place-search-label"
+      >Search a place, island or dive site</label
+    >
     <div class="field">
       <Icon name="search" size={18} color="var(--c-text-2)" />
       <input
@@ -216,7 +228,9 @@
         }}
       />
       {#if query}
-        <button class="clear" aria-label="Clear search" onclick={clear}><Icon name="close" size={16} /></button>
+        <button class="clear" aria-label="Clear search" onclick={clear}
+          ><Icon name="close" size={16} /></button
+        >
       {/if}
     </div>
   </header>
@@ -227,13 +241,22 @@
       <div class="pin" aria-hidden="true">
         <svg width="36" height="46" viewBox="0 0 36 46">
           <ellipse cx="18" cy="44" rx="8" ry="2.5" fill="#0E1A26" opacity="0.25" />
-          <path d="M18 44 C 18 44, 1 23, 1 17 A 17 17 0 0 1 35 17 C 35 23, 18 44, 18 44 Z" fill="#0A5F86" stroke="#fff" stroke-width="2" />
+          <path
+            d="M18 44 C 18 44, 1 23, 1 17 A 17 17 0 0 1 35 17 C 35 23, 18 44, 18 44 Z"
+            fill="#0A5F86"
+            stroke="#fff"
+            stroke-width="2"
+          />
           <circle cx="18" cy="17" r="6" fill="#fff" />
         </svg>
       </div>
       <div class="zoom">
-        <button class="icon-btn" aria-label="Zoom in" onclick={() => map?.zoomIn()}><Icon name="plus" size={18} /></button>
-        <button class="icon-btn" aria-label="Zoom out" onclick={() => map?.zoomOut()}><Icon name="minus" size={18} /></button>
+        <button class="icon-btn" aria-label="Zoom in" onclick={() => map?.zoomIn()}
+          ><Icon name="plus" size={18} /></button
+        >
+        <button class="icon-btn" aria-label="Zoom out" onclick={() => map?.zoomOut()}
+          ><Icon name="minus" size={18} /></button
+        >
       </div>
     {:else}
       <div class="placeholder">
@@ -246,7 +269,13 @@
       </div>
     {/if}
 
-    <ul id="place-results" role="listbox" aria-labelledby="place-search-label" class="results" hidden={!open}>
+    <ul
+      id="place-results"
+      role="listbox"
+      aria-labelledby="place-search-label"
+      class="results"
+      hidden={!open}
+    >
       {#if searchState === 'loading' && results.length === 0}
         <li class="note" role="presentation">Searching…</li>
       {:else if searchState === 'error'}
@@ -265,34 +294,37 @@
           onkeydown={() => {}}
         >
           <Icon name="pin" size={20} color="var(--c-primary)" />
-          <span class="r-text"><strong>{r.name}</strong>{#if r.region}<span>{r.region}</span>{/if}</span>
+          <span class="r-text"
+            ><strong>{r.name}</strong>{#if r.region}<span>{r.region}</span>{/if}</span
+          >
         </li>
       {/each}
     </ul>
   </div>
 
   {#if place}
-  <div class="sheet">
-    <div class="sheet-top">
-      <div class="place">
-        <strong>{place.name}</strong>
-        {#if place.region}<span>{place.region}</span>{/if}
+    <div class="sheet">
+      <div class="sheet-top">
+        <div class="place">
+          <strong>{place.name}</strong>
+          {#if place.region}<span>{place.region}</span>{/if}
+        </div>
+        <span class="coords">{coord(center.lat, 'N', 'S')}, {coord(center.lng, 'E', 'W')}</span>
       </div>
-      <span class="coords">{coord(center.lat, 'N', 'S')}, {coord(center.lng, 'E', 'W')}</span>
+      {#if check === 'land' || check === 'error'}
+        <span class="chip" role="status">
+          <Icon name="triangle" size={14} color="var(--c-marginal-icon)" strokeWidth={2.2} />
+          {check === 'land' ? 'Pin is on land' : 'Check failed'}
+        </span>
+      {/if}
+      <p class="hint">{hint}</p>
+      <button class="use" disabled={!canUse} aria-busy={check === 'checking'} onclick={use}>
+        {#if check === 'checking'}<span class="spinner light" aria-hidden="true"></span>Checking
+          position…{:else}Use this spot{/if}
+      </button>
     </div>
-    {#if check === 'land' || check === 'error'}
-      <span class="chip" role="status">
-        <Icon name="triangle" size={14} color="var(--c-marginal-icon)" strokeWidth={2.2} />
-        {check === 'land' ? 'Pin is on land' : 'Check failed'}
-      </span>
-    {/if}
-    <p class="hint">{hint}</p>
-    <button class="use" disabled={!canUse} aria-busy={check === 'checking'} onclick={use}>
-      {#if check === 'checking'}<span class="spinner light" aria-hidden="true"></span>Checking position…{:else}Use this spot{/if}
-    </button>
-  </div>
   {/if}
-</div>
+</main>
 
 <style>
   .screen {

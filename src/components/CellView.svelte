@@ -15,12 +15,17 @@
   let detail = $derived(compact ? undefined : glue(cell.detail));
   // OK cells read "OK" already; for others, say the severity explicitly for screen readers.
   let srPrefix = $derived(
-    cell.severity === 'none' ? 'No data' : cell.severity === 'ok' && text === 'OK' ? '' : severityText[cell.severity],
+    cell.severity === 'none'
+      ? 'No data'
+      : cell.severity === 'ok' && text === 'OK'
+        ? ''
+        : severityText[cell.severity],
   );
 </script>
 
 <div class="cell {cell.severity}" class:compact data-severity={cell.severity}>
-  <span class="visually-hidden">{context}{context ? ': ' : ''}{srPrefix}{srPrefix ? ', ' : ''}</span>
+  <span class="visually-hidden">{context}{context ? ': ' : ''}{srPrefix}{srPrefix ? ', ' : ''}</span
+  >
   <span class="main">
     <SeverityIcon severity={cell.severity} size={compact ? 12 : 13} />
     <span aria-hidden={cell.severity === 'none' ? 'true' : undefined}>{text}</span>

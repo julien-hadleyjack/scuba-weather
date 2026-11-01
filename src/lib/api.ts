@@ -71,7 +71,8 @@ async function getJson<T>(url: string, f: Fetch, signal?: AbortSignal): Promise<
   return body as T;
 }
 
-const num = (v: number | null | undefined): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+const num = (v: number | null | undefined): number | null =>
+  typeof v === 'number' && Number.isFinite(v) ? v : null;
 
 /**
  * Merge both responses into one hourly list keyed by local time.
@@ -177,7 +178,11 @@ function unique(parts: (string | undefined)[], name: string): string[] {
   return out;
 }
 
-export async function searchPlaces(query: string, signal?: AbortSignal, f: Fetch = fetch): Promise<Place[]> {
+export async function searchPlaces(
+  query: string,
+  signal?: AbortSignal,
+  f: Fetch = fetch,
+): Promise<Place[]> {
   const p = new URLSearchParams({ name: query, count: '5', language: 'en', format: 'json' });
   const body = await getJson<{ results?: GeoResult[] }>(`${GEOCODING_URL}?${p}`, f, signal);
   return (body.results ?? []).slice(0, 5).map((r) => ({
@@ -190,12 +195,21 @@ export async function searchPlaces(query: string, signal?: AbortSignal, f: Fetch
 }
 
 /** True when the Marine API has sea values for the point, false on land (SPOT-5). */
-export async function isOnWater(lat: number, lon: number, signal?: AbortSignal, f: Fetch = fetch): Promise<boolean> {
+export async function isOnWater(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal,
+  f: Fetch = fetch,
+): Promise<boolean> {
   const p = new URLSearchParams({
     latitude: round(lat),
     longitude: round(lon),
     current: 'wave_height',
   });
-  const body = await getJson<{ current?: { wave_height?: number | null } }>(`${MARINE_URL}?${p}`, f, signal);
+  const body = await getJson<{ current?: { wave_height?: number | null } }>(
+    `${MARINE_URL}?${p}`,
+    f,
+    signal,
+  );
   return num(body.current?.wave_height) !== null;
 }
