@@ -2,17 +2,12 @@
   import BlockChart from './BlockChart.svelte';
   import CellView from './CellView.svelte';
   import { describeBlock } from '../lib/chart-text';
+  import { METRICS as rows } from '../lib/classify';
+  import { DAY_START } from '../lib/thresholds';
   import { dayLabel, pad2 } from '../lib/time';
   import type { DayView } from '../lib/dashboard';
 
   let { title, day }: { title: string; day: DayView } = $props();
-
-  const rows = [
-    { key: 'rain', name: 'Rain' },
-    { key: 'storms', name: 'Storms' },
-    { key: 'wind', name: 'Wind' },
-    { key: 'waves', name: 'Waves' },
-  ] as const;
 
   const TICKS: Record<string, number[]> = {
     morning: [6, 9],
@@ -53,24 +48,17 @@
       <div class="row chart-row">
         <div class="chart-labels" aria-hidden="true"><span>Tide</span><span class="rain">Rain</span></div>
         {#each day.blocks as b (b.id)}
-          {@const from = b.start - 6}
-          {@const to = b.end - 6}
+          {@const hours = day.chart.hours.slice(b.start - DAY_START, b.end - DAY_START)}
+          {@const tide = day.chart.tide.slice(b.start - DAY_START, b.end - DAY_START + 1)}
           <div class:past={b.past}>
             <BlockChart
               start={b.start}
               end={b.end}
-              hours={day.chart.hours.slice(from, to)}
-              tide={day.chart.tide.slice(from, to + 1)}
+              {hours}
+              {tide}
               night={day.chart.night}
               ticks={TICKS[b.id]}
-              label={describeBlock(
-                b.name,
-                day.chart.hours.slice(from, to),
-                day.chart.tide.slice(from, to + 1),
-                day.chart.night,
-                b.start,
-                b.end,
-              )}
+              label={describeBlock(b.name, hours, tide, day.chart.night, b.start, b.end)}
             />
           </div>
         {/each}

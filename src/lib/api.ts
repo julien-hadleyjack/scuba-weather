@@ -1,6 +1,7 @@
 // Open-Meteo clients (DATA-1, DATA-2, SPOT-2, SPOT-5). No API key needed.
 // 6 forecast days: a forecast up to 12 h old (the most we show) still covers
 // today + tomorrow + the three outlook days after a date change at the spot.
+import { REQUEST_TIMEOUT_MS } from './thresholds';
 import type { DayInfo, Forecast, Hour, Place, Spot } from './types';
 
 export const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
@@ -119,13 +120,36 @@ export function parseForecast(
   };
 }
 
-/** Both requests in parallel; fails unless both succeed (DATA-3). */
-export async function fetchForecast(spot: Spot, f: Fetch = fetch, now = Date.now): Promise<Forecast> {
-  const [fc, marine] = await Promise.all([
-    getJson<ForecastResponse>(forecastUrl(spot.latitude, spot.longitude), f),
-    getJson<MarineResponse>(marineUrl(spot.latitude, spot.longitude), f),
-  ]);
-  return parseForecast(spot, fc, marine, now());
+/**
+ * Both requests in parallel; fails unless both succeed within the timeout
+ * (DATA-3). On failure or timeout the other request is cancelled.
+ */
+export async function fetchForecast(
+  spot: Spot,
+  f: Fetch = fetch,
+  now = Date.now,
+  timeoutMs = REQUEST_TIMEOUT_MS,
+): Promise<Forecast> {
+  const ctrl = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
+  });
+  try {
+    const [fc, marine] = await Promise.race([
+      Promise.all([
+        getJson<ForecastResponse>(forecastUrl(spot.latitude, spot.longitude), f, ctrl.signal),
+        getJson<MarineResponse>(marineUrl(spot.latitude, spot.longitude), f, ctrl.signal),
+      ]),
+      timeout,
+    ]);
+    return parseForecast(spot, fc, marine, now());
+  } catch (e) {
+    ctrl.abort();
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 interface GeoResult {

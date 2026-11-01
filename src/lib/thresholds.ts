@@ -43,5 +43,7 @@ export const DAY_END = 24;
 
 /** Auto-refresh when data is older than this. */
 export const REFRESH_AFTER_MS = 60 * 60 * 1000;
+/** A forecast request that takes longer counts as failed (DATA-3). */
+export const REQUEST_TIMEOUT_MS = 20_000;
 /** Warn when data is older than this. */
 export const STALE_AFTER_MS = 12 * 60 * 60 * 1000;

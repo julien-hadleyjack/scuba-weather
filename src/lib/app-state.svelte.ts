@@ -33,6 +33,8 @@ export class AppState {
   now = $state(0);
 
   private deps: Deps;
+  /** Id of the latest refresh; older ones are ignored when they finish (SPOT-8). */
+  private refreshId = 0;
 
   constructor(deps: Partial<Deps> = {}) {
     this.deps = { ...defaultDeps, ...deps };
@@ -50,6 +52,8 @@ export class AppState {
   setOnline(online: boolean): void {
     if (online === this.online) return;
     this.online = online;
+    // Going offline clears a failed refresh (OFF-4).
+    if (!online) this.failed = false;
     this.tick();
     if (online) void this.autoRefresh();
   }
@@ -69,19 +73,23 @@ export class AppState {
       this.setOnline(false);
       return;
     }
+    const id = ++this.refreshId;
     this.refreshing = true;
     try {
       const f = await this.deps.fetchForecast(spot);
-      if (this.spot !== spot) return; // spot changed meanwhile
+      if (id !== this.refreshId) return; // superseded, e.g. the spot changed
       this.forecast = f;
       this.deps.saveForecast(f);
       this.failed = false;
     } catch {
-      if (this.spot === spot) this.failed = true;
+      if (id !== this.refreshId) return;
+      this.failed = true;
       if (!this.deps.online()) this.setOnline(false);
     } finally {
-      this.refreshing = false;
-      this.tick();
+      if (id === this.refreshId) {
+        this.refreshing = false;
+        this.tick();
+      }
     }
   }
 
@@ -90,6 +98,8 @@ export class AppState {
     this.spot = spot;
     this.forecast = null;
     this.failed = false;
+    // A refresh still running for the previous spot is ignored (SPOT-8).
+    this.refreshId++;
     this.refreshing = false;
     await this.refresh();
   }

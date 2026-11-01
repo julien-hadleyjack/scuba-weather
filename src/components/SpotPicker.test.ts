@@ -186,6 +186,51 @@ describe('SpotPicker', () => {
     await waitFor(() => expect(t.onUse).toHaveBeenCalled());
   });
 
+  it('choosing a result cancels a pending search, so the list stays closed (SPOT-2)', async () => {
+    const t = setup();
+    await type(t.input, 'koh');
+    const [first] = await screen.findAllByRole('option');
+    await type(t.input, 'koh t'); // debounced search now pending
+    await fireEvent.click(first);
+    expect(t.input).toHaveAttribute('aria-expanded', 'false');
+    await new Promise((r) => setTimeout(r, 350));
+    expect(api.searchPlaces).toHaveBeenCalledTimes(1);
+    expect(t.input).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('a search answering after a result was chosen is ignored (SPOT-2)', async () => {
+    const t = setup();
+    await type(t.input, 'koh');
+    const [first] = await screen.findAllByRole('option');
+    let resolve!: (p: Place[]) => void;
+    api.searchPlaces.mockImplementationOnce(() => new Promise((r) => (resolve = r)));
+    await type(t.input, 'koh t');
+    await waitFor(() => expect(api.searchPlaces).toHaveBeenCalledTimes(2));
+    await fireEvent.click(first);
+    resolve(places); // ignores the abort signal and answers anyway
+    await new Promise((r) => setTimeout(r, 0));
+    expect(t.input).toHaveAttribute('aria-expanded', 'false');
+    await fireEvent.focus(t.input); // no late results waiting to reopen the list
+    expect(t.input).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('choosing a result clears an earlier land result, even without a map move (SPOT-5)', async () => {
+    const t = setup();
+    await pickFirst(t.input);
+    api.isOnWater.mockResolvedValueOnce(false);
+    await fireEvent.click(t.useBtn);
+    await screen.findByText('Pin is on land');
+    expect(t.useBtn).toBeDisabled();
+    // same place again: setView to the same position, the stand-in still fires
+    // move events, so stop it from doing so to mimic a no-op setView
+    t.map.move = () => {};
+    await type(t.input, 'koh t');
+    const [again] = await screen.findAllByRole('option');
+    await fireEvent.click(again);
+    expect(screen.queryByText('Pin is on land')).toBeNull();
+    expect(t.useBtn).toBeEnabled();
+  });
+
   it('moving the map cancels a running check', async () => {
     const t = setup({ initial: stored });
     api.isOnWater.mockImplementationOnce(

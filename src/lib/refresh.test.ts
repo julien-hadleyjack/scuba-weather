@@ -101,6 +101,79 @@ describe('AppState refresh', () => {
     await vi.waitFor(() => expect(deps.fetchForecast).toHaveBeenCalledTimes(1));
     expect(state.online).toBe(true);
   });
+
+  it('a refresh for the previous spot does not end the new spot\'s loading (SPOT-8)', async () => {
+    const pending: ((f: Forecast) => void)[] = [];
+    const fetchForecast = vi.fn(() => new Promise<Forecast>((r) => pending.push(r)));
+    const { state, saved } = setup({ fetchForecast });
+    void state.refresh(); // spot A
+    const other: Spot = { name: 'Sail Rock', region: '', latitude: 9.9, longitude: 100 };
+    const choosing = state.chooseSpot(other);
+    expect(fetchForecast).toHaveBeenCalledTimes(2);
+
+    pending[0]({ ...forecast(), latitude: 10, longitude: 99.8 }); // A finishes late
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(state.refreshing).toBe(true);
+    expect(state.forecast).toBeNull();
+    expect(saved).toHaveLength(0);
+    await state.refresh(); // still busy: no third request
+    expect(fetchForecast).toHaveBeenCalledTimes(2);
+
+    const b = { ...forecast(), latitude: 9.9, longitude: 100 };
+    pending[1](b);
+    await choosing;
+    expect(state.refreshing).toBe(false);
+    expect(state.forecast).toBe(b);
+    expect(saved).toEqual([b]);
+  });
+
+  it('a late failure for the previous spot is ignored too', async () => {
+    const pending: ((e: Error) => void)[] = [];
+    const fetchForecast = vi.fn(() => new Promise<Forecast>((_, rej) => pending.push(rej)));
+    const { state } = setup({ fetchForecast });
+    const first = state.refresh();
+    void state.chooseSpot({ name: 'Sail Rock', region: '', latitude: 9.9, longitude: 100 });
+    pending[0](new Error('HTTP 500'));
+    await first;
+    expect(state.failed).toBe(false);
+    expect(state.refreshing).toBe(true);
+  });
+
+  it('going offline clears a failed refresh (OFF-4)', async () => {
+    let online = true;
+    const stored = { ...forecast(), latitude: 10, longitude: 99.8, fetchedAt: Date.UTC(2026, 10, 1, 2, 30) };
+    const { state, deps } = setup({
+      stored,
+      online: () => online,
+      fetchForecast: vi.fn(async () => Promise.reject(new Error('HTTP 500'))),
+    });
+    await state.refresh();
+    expect(state.failed).toBe(true);
+    online = false;
+    state.setOnline(false);
+    expect(state.failed).toBe(false);
+    online = true;
+    state.setOnline(true);
+    await Promise.resolve();
+    // fresh data: no new attempt, so no failed banner
+    expect(deps.fetchForecast).toHaveBeenCalledTimes(1);
+    expect(state.failed).toBe(false);
+  });
+
+  it('a failure that happens because the device went offline shows as offline only', async () => {
+    let online = true;
+    const { state } = setup({
+      online: () => online,
+      fetchForecast: async () => {
+        online = false;
+        throw new Error('network');
+      },
+    });
+    await state.refresh();
+    expect(state.online).toBe(false);
+    expect(state.failed).toBe(false);
+  });
 });
 
 describe('banners', () => {
@@ -256,6 +329,40 @@ describe('api', () => {
         ? new Response('', { status: 503 })
         : new Response(JSON.stringify(fcBody))) as unknown as typeof fetch;
     await expect(fetchForecast(spot, marineDown)).rejects.toThrow('HTTP 503');
+  });
+
+  it('fetchForecast fails after the timeout and cancels both requests (DATA-3)', async () => {
+    vi.useFakeTimers();
+    try {
+      const signals: AbortSignal[] = [];
+      const hang = ((_url: string, init?: RequestInit) => {
+        signals.push(init!.signal!);
+        return new Promise(() => {}); // never answers, even when aborted
+      }) as unknown as typeof fetch;
+      const p = fetchForecast(spot, hang);
+      const result = expect(p).rejects.toThrow('Request timed out');
+      await vi.advanceTimersByTimeAsync(19_999);
+      expect(signals.every((s) => !s.aborted)).toBe(true);
+      await vi.advanceTimersByTimeAsync(1);
+      await result;
+      expect(signals).toHaveLength(2);
+      expect(signals.every((s) => s.aborted)).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('fetchForecast cancels the other request when one fails', async () => {
+    let marineSignal: AbortSignal | undefined;
+    const f = ((url: string, init?: RequestInit) => {
+      if (url.includes('marine')) {
+        marineSignal = init!.signal!;
+        return new Promise(() => {});
+      }
+      return Promise.resolve(new Response('', { status: 429 }));
+    }) as unknown as typeof fetch;
+    await expect(fetchForecast(spot, f)).rejects.toThrow('HTTP 429');
+    expect(marineSignal!.aborted).toBe(true);
   });
 
   it('API error bodies are failures', async () => {

@@ -1,8 +1,6 @@
 # Scuba Weather: specification
 
-Version 1.3 · 2026-11-01
-
-Single source for what the app does and why. Combines the planning decisions and the requirements (v1.3). Wireframes: [`docs/wireframes/`](docs/wireframes/index.html).
+Single source for what the app does and why. Combines the planning decisions and the requirements. Wireframes: [`docs/wireframes/`](docs/wireframes/index.html).
 
 Requirement IDs (SPOT-, DASH-, DATA-, OFF-, NFR-, TEST-) are stable and referenced from code and tests.
 

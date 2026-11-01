@@ -44,8 +44,7 @@
   let map: L.Map | undefined;
 
   function onInput() {
-    clearTimeout(searchTimer);
-    searchAbort?.abort();
+    cancelSearch();
     active = -1;
     const q = query.trim();
     if (q.length < 2) {
@@ -58,20 +57,32 @@
   }
 
   async function runSearch(q: string) {
-    searchAbort = new AbortController();
+    const ctrl = (searchAbort = new AbortController());
     searchState = 'loading';
     open = true;
     try {
-      results = await searchPlaces(q, searchAbort.signal);
+      const found = await searchPlaces(q, ctrl.signal);
+      if (ctrl.signal.aborted) return;
+      results = found;
       searchState = 'done';
-    } catch (e) {
-      if ((e as Error).name === 'AbortError') return;
+    } catch {
+      if (ctrl.signal.aborted) return;
       results = [];
       searchState = 'error';
     }
   }
 
+  function cancelSearch() {
+    clearTimeout(searchTimer);
+    searchAbort?.abort();
+  }
+
   function choose(p: Place) {
+    // SPOT-2: no late results reopen the list; SPOT-5: a new place clears the check.
+    cancelSearch();
+    searchState = 'idle';
+    checkAbort?.abort();
+    check = 'idle';
     place = { name: p.name, region: p.region };
     query = p.name;
     open = false;
@@ -161,8 +172,7 @@
   });
 
   onDestroy(() => {
-    clearTimeout(searchTimer);
-    searchAbort?.abort();
+    cancelSearch();
     checkAbort?.abort();
     map?.remove();
   });

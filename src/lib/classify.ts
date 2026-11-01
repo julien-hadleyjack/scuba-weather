@@ -162,6 +162,14 @@ export interface WindowCells {
   waves: Cell;
 }
 
+/** The four metrics in display order: rows of a day grid, columns of the outlook. */
+export const METRICS = [
+  { key: 'rain', name: 'Rain' },
+  { key: 'storms', name: 'Storms' },
+  { key: 'wind', name: 'Wind' },
+  { key: 'waves', name: 'Waves' },
+] as const satisfies readonly { key: keyof WindowCells; name: string }[];
+
 export function classifyWindow(hours: Hour[]): WindowCells {
   return {
     rain: classifyRain(hours),

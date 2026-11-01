@@ -1,15 +1,10 @@
 <script lang="ts">
   import CellView from './CellView.svelte';
+  import { METRICS as cols } from '../lib/classify';
   import { dayLabel } from '../lib/time';
   import type { OutlookRow } from '../lib/dashboard';
 
   let { rows }: { rows: OutlookRow[] } = $props();
-  const cols = [
-    { key: 'rain', name: 'Rain' },
-    { key: 'storms', name: 'Storms' },
-    { key: 'wind', name: 'Wind' },
-    { key: 'waves', name: 'Waves' },
-  ] as const;
 </script>
 
 <section class="outlook" aria-labelledby="next-days">

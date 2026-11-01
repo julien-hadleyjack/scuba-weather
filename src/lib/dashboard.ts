@@ -47,8 +47,22 @@ export interface DashboardView {
   outlook: OutlookRow[];
 }
 
+// Hours grouped by local date, built once per forecast object. The dashboard is
+// rebuilt every minute (DATA-5); this avoids rescanning all hours each time.
+const byDate = new WeakMap<Forecast, Map<string, Hour[]>>();
+
 function hoursOf(forecast: Forecast, date: string): Hour[] {
-  return forecast.hours.filter((h) => h.date === date);
+  let index = byDate.get(forecast);
+  if (!index) {
+    index = new Map();
+    for (const h of forecast.hours) {
+      const list = index.get(h.date);
+      if (list) list.push(h);
+      else index.set(h.date, [h]);
+    }
+    byDate.set(forecast, index);
+  }
+  return index.get(date) ?? [];
 }
 
 function window(hours: Hour[], start: number, end: number): Hour[] {
@@ -79,7 +93,7 @@ export function buildDay(forecast: Forecast, date: string, now: LocalTime): DayV
 
   // Tide at 06 … 24, where 24 is the next day's 00:00. Scaled between the
   // lowest and highest sea level of the calendar day (plus that end point).
-  const midnight = forecast.hours.find((h) => h.date === addDays(date, 1) && h.hour === 0)?.seaLevel ?? null;
+  const midnight = hoursOf(forecast, addDays(date, 1)).find((h) => h.hour === 0)?.seaLevel ?? null;
   const at = (h: number) => (h === 24 ? midnight : (byHour.get(h)?.seaLevel ?? null));
   const levels = [...all.map((h) => h.seaLevel), midnight].filter((v): v is number => v !== null);
   const lo = Math.min(...levels);
@@ -108,7 +122,7 @@ export function buildDay(forecast: Forecast, date: string, now: LocalTime): DayV
 }
 
 function hasDay(forecast: Forecast, date: string): boolean {
-  return forecast.hours.some((h) => h.date === date && h.hour >= DAY_START && h.hour < DAY_END);
+  return hoursOf(forecast, date).some((h) => h.hour >= DAY_START && h.hour < DAY_END);
 }
 
 /**
