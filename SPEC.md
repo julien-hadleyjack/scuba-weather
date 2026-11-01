@@ -73,7 +73,7 @@ The wireframes are static mockups at 390 px with sample data. Where they and thi
     - bar height 2.85 px per mm/h, at least 5 px, at most 68 px (68 px ≈ 24 mm/h)
   - the tide as a line through the hourly sea level at 06 … 24 (24 = the next day's 00:00; on the last forecast day the line ends at 23), scaled between the lowest and highest value of the calendar day (00–23) and that 24:00 point; no times or heights shown
   - night shading for the hours before sunrise and after sunset; no shading when the day has no sunrise or sunset (polar day/night)
-  - hour ticks (06, 09, 12, 15, 18, 21, 24)
+  - hour ticks every 2 hours (06, 08 … 24), each label centered on its tick at the hour boundary between bars
   - a small key: Tide / Night / Rain per hour
   - a text alternative per block, e.g. "Afternoon: rain in 3 of 6 hours, peak 14 mm/h at 15:00, tide rising, partly dark"
 - **DASH-8** Below the chart: "Water NN °C" (average sea surface temperature of the hours 06–23, rounded; "–" without data).
