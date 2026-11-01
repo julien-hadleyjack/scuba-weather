@@ -2,4 +2,4 @@
 idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
-"aqua:j178/prek" = "0.5.9"
+prek = "0.5.9"
