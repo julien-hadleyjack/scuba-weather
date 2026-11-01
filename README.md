@@ -4,7 +4,7 @@ Phone-first PWA that shows dive-relevant weather for one dive spot: rain, thunde
 wind and waves for today and tomorrow (Morning / Afternoon / Night), plus a 3-day outlook.
 Not a safety tool.
 
-What the app does and why: [SPEC.md](SPEC.md). Wireframes: [docs/wireframes/](docs/wireframes/index.html) (static HTML, open in a browser).
+What the app does and why: [SPEC.md](SPEC.md). Wireframes: [view in the browser](https://htmlpreview.github.io/?https://github.com/julien-hadleyjack/scuba-weather/blob/main/docs/wireframes/index.html) (via htmlpreview.github.io; sources and details in [docs/wireframes/](docs/wireframes/README.md)).
 
 ## Run
 
