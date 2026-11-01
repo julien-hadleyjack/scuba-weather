@@ -2,7 +2,11 @@
 import { REFRESH_AFTER_MS, STALE_AFTER_MS } from './thresholds';
 import { ago } from './time';
 
-export function shouldAutoRefresh(fetchedAt: number | null, nowMs: number, online: boolean): boolean {
+export function shouldAutoRefresh(
+  fetchedAt: number | null,
+  nowMs: number,
+  online: boolean,
+): boolean {
   if (!online) return false;
   return fetchedAt === null || nowMs - fetchedAt > REFRESH_AFTER_MS;
 }

@@ -36,7 +36,9 @@ function formatter(timeZone: string): Intl.DateTimeFormat | null {
 export function localTime(epochMs: number, timeZone: string, utcOffsetSeconds: number): LocalTime {
   const f = formatter(timeZone);
   if (f) {
-    const parts = Object.fromEntries(f.formatToParts(new Date(epochMs)).map((p) => [p.type, p.value]));
+    const parts = Object.fromEntries(
+      f.formatToParts(new Date(epochMs)).map((p) => [p.type, p.value]),
+    );
     return {
       date: `${parts.year}-${parts.month}-${parts.day}`,
       hour: Number(parts.hour) % 24,

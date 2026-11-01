@@ -3,7 +3,14 @@
   // columns (DASH-7). Each block's part is drawn in its own clipped group so a
   // block that is over can be dimmed on its own (DASH-9).
   import { curveMonotoneX, line } from 'd3-shape';
-  import { RAIN_HEAVY, RAIN_MODERATE, RAINY_HOUR_MM, DRIZZLE_HOUR_MM, DAY_END, DAY_START } from '../lib/thresholds';
+  import {
+    RAIN_HEAVY,
+    RAIN_MODERATE,
+    RAINY_HOUR_MM,
+    DRIZZLE_HOUR_MM,
+    DAY_END,
+    DAY_START,
+  } from '../lib/thresholds';
   import type { BlockView, DayChart as ChartData } from '../lib/dashboard';
   import { pad2 } from '../lib/time';
 
@@ -33,7 +40,12 @@
     if (p === null || p < DRIZZLE_HOUR_MM) return { h: 1.5, fill: 'var(--c-rain-dry)', rx: 0 };
     if (p < RAINY_HOUR_MM) return { h: 3, fill: 'var(--c-rain-drizzle)', rx: 1 };
     const h = Math.min(68, Math.max(5, p * 2.85));
-    const fill = p >= RAIN_HEAVY ? 'var(--c-rain-heavy)' : p >= RAIN_MODERATE ? 'var(--c-rain-moderate)' : 'var(--c-rain-light)';
+    const fill =
+      p >= RAIN_HEAVY
+        ? 'var(--c-rain-heavy)'
+        : p >= RAIN_MODERATE
+          ? 'var(--c-rain-moderate)'
+          : 'var(--c-rain-light)';
     return { h, fill, rx: 1.5 };
   }
 
@@ -84,11 +96,24 @@
           {/each}
           <line x1="0" y1={BASE} x2={w} y2={BASE} stroke="#B9C5CF" stroke-width="1" />
           {#if tidePath}
-            <path d={tidePath} fill="none" stroke="var(--c-tide)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+            <path
+              d={tidePath}
+              fill="none"
+              stroke="var(--c-tide)"
+              stroke-width="2"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            />
           {/if}
         </g>
         {#each chart.hours.filter((h) => h.hour >= b.start && h.hour < b.end && h.hour % 2 === 0) as h (h.hour)}
-          <text x={x(h.hour + 0.5)} y="87" font-size="10" fill="var(--c-text-3)" text-anchor="middle">{pad2(h.hour)}</text>
+          <text
+            x={x(h.hour + 0.5)}
+            y="87"
+            font-size="10"
+            fill="var(--c-text-3)"
+            text-anchor="middle">{pad2(h.hour)}</text
+          >
         {/each}
       </g>
     {/each}

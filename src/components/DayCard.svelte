@@ -40,7 +40,9 @@
         </div>
       {/each}
       <div class="row chart-row">
-        <div class="chart-labels" aria-hidden="true"><span>Tide</span><span class="rain">Rain</span></div>
+        <div class="chart-labels" aria-hidden="true">
+          <span>Tide</span><span class="rain">Rain</span>
+        </div>
         <DayChart
           chart={day.chart}
           blocks={day.blocks}

@@ -18,7 +18,12 @@ const places: Place[] = [
   { id: 1, name: 'Koh Tao', region: 'Surat Thani, Thailand', latitude: 10.1, longitude: 99.84 },
   { id: 2, name: 'Koh Tao Pier', region: '', latitude: 10.09, longitude: 99.82 },
 ];
-const stored: Spot = { name: 'Chalok Bay', region: 'Surat Thani, Thailand', latitude: 10.06, longitude: 99.82 };
+const stored: Spot = {
+  name: 'Chalok Bay',
+  region: 'Surat Thani, Thailand',
+  latitude: 10.06,
+  longitude: 99.82,
+};
 
 function setup(props: Partial<{ initial: Spot | null; online: boolean; onBack: () => void }> = {}) {
   const onUse = vi.fn();
@@ -235,7 +240,9 @@ describe('SpotPicker', () => {
     const t = setup({ initial: stored });
     api.isOnWater.mockImplementationOnce(
       (_a, _b, signal) =>
-        new Promise((_, reject) => signal!.addEventListener('abort', () => reject(new DOMException('x', 'AbortError')))),
+        new Promise((_, reject) =>
+          signal!.addEventListener('abort', () => reject(new DOMException('x', 'AbortError'))),
+        ),
     );
     await fireEvent.click(t.useBtn);
     t.map.panTo(-13.75, -100.5);
@@ -269,12 +276,16 @@ describe('SpotPicker', () => {
 
   it('tells the user when offline', async () => {
     setup({ online: false });
-    expect(screen.getByText('You are offline. Choosing a dive spot needs a connection.')).toBeInTheDocument();
+    expect(
+      screen.getByText('You are offline. Choosing a dive spot needs a connection.'),
+    ).toBeInTheDocument();
   });
 
   it('offline hint in the sheet when a spot is shown', async () => {
     const t = setup({ online: false, initial: stored });
-    expect(screen.getByText('You are offline. Choosing a spot needs a connection.')).toBeInTheDocument();
+    expect(
+      screen.getByText('You are offline. Choosing a spot needs a connection.'),
+    ).toBeInTheDocument();
     expect(t.useBtn).toBeDisabled();
   });
 

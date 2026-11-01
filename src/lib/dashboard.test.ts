@@ -101,7 +101,9 @@ describe('day view', () => {
 
   it('chart covers 06–24 with night shading from sunrise/sunset', () => {
     const day = buildDay(forecast(), '2026-11-01', now);
-    expect(day.chart.hours.map((h) => h.hour)).toEqual([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]);
+    expect(day.chart.hours.map((h) => h.hour)).toEqual([
+      6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+    ]);
     expect(day.chart.tide).toHaveLength(19);
     expect(day.chart.night[0][0]).toBe(6);
     expect(day.chart.night[0][1]).toBeCloseTo(6 + 10 / 60);
@@ -110,7 +112,9 @@ describe('day view', () => {
   });
 
   it('the tide line ends with the next day 00:00, missing on the last day', () => {
-    const f = forecast('2026-11-01', 2, (h) => ({ seaLevel: h.date === '2026-11-02' && h.hour === 0 ? 5 : 0 }));
+    const f = forecast('2026-11-01', 2, (h) => ({
+      seaLevel: h.date === '2026-11-02' && h.hour === 0 ? 5 : 0,
+    }));
     expect(buildDay(f, '2026-11-01', now).chart.tide.at(-1)).toBe(1);
     expect(buildDay(f, '2026-11-02', now).chart.tide.at(-1)).toBeNull();
   });
@@ -123,7 +127,9 @@ describe('day view', () => {
   });
 
   it('water temperature is the rounded 06–24 average', () => {
-    const f = forecast('2026-11-01', 1, (h) => ({ sst: h.hour >= 6 ? (h.hour < 15 ? 28.4 : 29.0) : 10 }));
+    const f = forecast('2026-11-01', 1, (h) => ({
+      sst: h.hour >= 6 ? (h.hour < 15 ? 28.4 : 29.0) : 10,
+    }));
     expect(buildDay(f, '2026-11-01', now).water).toBe(29);
     const none = forecast('2026-11-01', 1, () => ({ sst: null }));
     expect(buildDay(none, '2026-11-01', now).water).toBeNull();

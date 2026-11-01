@@ -4,7 +4,9 @@ import CellView from './CellView.svelte';
 
 describe('CellView', () => {
   it('OK cell: check icon, grey style, label only', () => {
-    const { container } = render(CellView, { cell: { severity: 'ok', label: 'Dry', short: 'Dry' } });
+    const { container } = render(CellView, {
+      cell: { severity: 'ok', label: 'Dry', short: 'Dry' },
+    });
     const cell = container.querySelector('.cell')!;
     expect(cell).toHaveClass('ok');
     expect(cell).toHaveTextContent('Dry');
@@ -15,7 +17,12 @@ describe('CellView', () => {
   it('marginal cell: triangle icon, amber style, detail line, severity in text', () => {
     const { container } = render(CellView, {
       props: {
-        cell: { severity: 'marginal', label: 'Wind', detail: '24 km/h SW gusts 41', short: '24 km/h' },
+        cell: {
+          severity: 'marginal',
+          label: 'Wind',
+          detail: '24 km/h SW gusts 41',
+          short: '24 km/h',
+        },
         context: 'Afternoon Wind',
       },
     });

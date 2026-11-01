@@ -18,7 +18,8 @@
       {#each rows as r (r.date)}
         {@const l = dayLabel(r.date)}
         <div class="row" role="row">
-          <span class="day" role="rowheader"><strong>{l.weekday}</strong><span>{l.date}</span></span>
+          <span class="day" role="rowheader"><strong>{l.weekday}</strong><span>{l.date}</span></span
+          >
           {#each cols as c (c.key)}
             <div role="cell"><CellView cell={r.cells[c.key]} compact /></div>
           {/each}

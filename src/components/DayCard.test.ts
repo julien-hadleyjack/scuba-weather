@@ -16,7 +16,9 @@ describe('DayCard', () => {
     expect(container.querySelectorAll('.past')).toHaveLength(6);
     expect(container.textContent).toContain('Water 29 °C');
     expect(
-      screen.getByRole('img', { name: /^Morning: .*\. Afternoon: rain in 1 of 6 hours, peak 14 mm\/h at 14:00.*\. Night: / }),
+      screen.getByRole('img', {
+        name: /^Morning: .*\. Afternoon: rain in 1 of 6 hours, peak 14 mm\/h at 14:00.*\. Night: /,
+      }),
     ).toBeInTheDocument();
   });
 });

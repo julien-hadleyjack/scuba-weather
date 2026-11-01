@@ -48,6 +48,9 @@ export function saveForecast(f: Forecast): void {
   write(FORECAST_KEY, f);
 }
 
-export function sameSpot(f: Pick<Forecast, 'latitude' | 'longitude'>, s: Pick<Spot, 'latitude' | 'longitude'>): boolean {
+export function sameSpot(
+  f: Pick<Forecast, 'latitude' | 'longitude'>,
+  s: Pick<Spot, 'latitude' | 'longitude'>,
+): boolean {
   return Math.abs(f.latitude - s.latitude) < 1e-6 && Math.abs(f.longitude - s.longitude) < 1e-6;
 }

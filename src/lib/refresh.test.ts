@@ -1,12 +1,24 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AppState, type Deps } from './app-state.svelte';
-import { fetchForecast, forecastUrl, isOnWater, marineUrl, parseForecast, searchPlaces } from './api';
+import {
+  fetchForecast,
+  forecastUrl,
+  isOnWater,
+  marineUrl,
+  parseForecast,
+  searchPlaces,
+} from './api';
 import { pickBanner, shouldAutoRefresh, type StatusInput } from './status';
 import { forecast } from '../test/helpers';
 import type { Forecast, Spot } from './types';
 
 const HOUR = 3_600_000;
-const spot: Spot = { name: 'Chalok Bay', region: 'Surat Thani, Thailand', latitude: 10, longitude: 99.8 };
+const spot: Spot = {
+  name: 'Chalok Bay',
+  region: 'Surat Thani, Thailand',
+  latitude: 10,
+  longitude: 99.8,
+};
 
 describe('shouldAutoRefresh', () => {
   const now = Date.UTC(2026, 10, 1, 12);
@@ -38,7 +50,12 @@ function setup(over: Partial<Deps> & { stored?: Forecast | null; clock?: { t: nu
 
 describe('AppState refresh', () => {
   it('auto-refreshes stale data on open and stores the result', async () => {
-    const stored = { ...forecast(), latitude: 10, longitude: 99.8, fetchedAt: Date.UTC(2026, 10, 1, 1) };
+    const stored = {
+      ...forecast(),
+      latitude: 10,
+      longitude: 99.8,
+      fetchedAt: Date.UTC(2026, 10, 1, 1),
+    };
     const { state, deps, saved } = setup({ stored });
     await state.autoRefresh();
     expect(deps.fetchForecast).toHaveBeenCalledTimes(1);
@@ -66,7 +83,10 @@ describe('AppState refresh', () => {
 
   it('a failed request keeps the old forecast and flags the failure', async () => {
     const stored = { ...forecast(), fetchedAt: Date.UTC(2026, 10, 1, 0) };
-    const { state, saved } = setup({ stored, fetchForecast: async () => Promise.reject(new Error('HTTP 500')) });
+    const { state, saved } = setup({
+      stored,
+      fetchForecast: async () => Promise.reject(new Error('HTTP 500')),
+    });
     await state.refresh();
     expect(state.failed).toBe(true);
     expect(state.refreshing).toBe(false);
@@ -102,7 +122,7 @@ describe('AppState refresh', () => {
     expect(state.online).toBe(true);
   });
 
-  it('a refresh for the previous spot does not end the new spot\'s loading (SPOT-8)', async () => {
+  it("a refresh for the previous spot does not end the new spot's loading (SPOT-8)", async () => {
     const pending: ((f: Forecast) => void)[] = [];
     const fetchForecast = vi.fn(() => new Promise<Forecast>((r) => pending.push(r)));
     const { state, saved } = setup({ fetchForecast });
@@ -142,7 +162,12 @@ describe('AppState refresh', () => {
 
   it('going offline clears a failed refresh (OFF-4)', async () => {
     let online = true;
-    const stored = { ...forecast(), latitude: 10, longitude: 99.8, fetchedAt: Date.UTC(2026, 10, 1, 2, 30) };
+    const stored = {
+      ...forecast(),
+      latitude: 10,
+      longitude: 99.8,
+      fetchedAt: Date.UTC(2026, 10, 1, 2, 30),
+    };
     const { state, deps } = setup({
       stored,
       online: () => online,
@@ -215,10 +240,14 @@ describe('banners', () => {
     expect(pickBanner({ ...at(14), online: false })!.text).toBe(
       'The stored forecast is 14 h old. Connect to the internet to load a new one.',
     );
-    expect(pickBanner(at(72))!.text).toBe('The stored forecast is 3 d old. Tap refresh to load a new one.');
+    expect(pickBanner(at(72))!.text).toBe(
+      'The stored forecast is 3 d old. Tap refresh to load a new one.',
+    );
   });
   it('a forecast that does not cover today is stale too', () => {
-    expect(pickBanner({ ...base, coversToday: false, online: false, failed: true })!.kind).toBe('stale');
+    expect(pickBanner({ ...base, coversToday: false, online: false, failed: true })!.kind).toBe(
+      'stale',
+    );
   });
 });
 
@@ -234,7 +263,9 @@ describe('api', () => {
     expect(f.searchParams.get('forecast_days')).toBe('6');
     expect(new URL(marineUrl(1, 1)).searchParams.get('forecast_days')).toBe('6');
     const m = new URL(marineUrl(10.06, 99.82));
-    expect(m.searchParams.get('hourly')).toBe('wave_height,wave_period,sea_level_height_msl,sea_surface_temperature');
+    expect(m.searchParams.get('hourly')).toBe(
+      'wave_height,wave_period,sea_level_height_msl,sea_surface_temperature',
+    );
   });
 
   it('merges forecast and marine hours by local time', () => {
@@ -283,10 +314,26 @@ describe('api', () => {
       },
       daily: { time: ['2026-11-01'], sunrise: ['2026-11-01T06:10'], sunset: ['2026-11-01T17:55'] },
     };
-    const marine = { hourly: { time: [], wave_height: [], wave_period: [], sea_level_height_msl: [], sea_surface_temperature: [] } };
+    const marine = {
+      hourly: {
+        time: [],
+        wave_height: [],
+        wave_period: [],
+        sea_level_height_msl: [],
+        sea_surface_temperature: [],
+      },
+    };
     const [h5, h6, h7] = parseForecast(spot, fc, marine, 0).hours;
     // 06:00–06:59 rain/gusts/code are reported at 07:00; instant values stay at their own hour.
-    expect(h6).toMatchObject({ hour: 6, precip: 1.2, gust: 25, code: 95, cape: 100, wind: 10, dir: 180 });
+    expect(h6).toMatchObject({
+      hour: 6,
+      precip: 1.2,
+      gust: 25,
+      code: 95,
+      cape: 100,
+      wind: 10,
+      dir: 180,
+    });
     expect(h5).toMatchObject({ hour: 5, precip: 0, gust: 20, code: 1 });
     // The last hour has no following timestamp: no data (DATA-8).
     expect(h7).toMatchObject({ hour: 7, precip: null, gust: null, code: null, cape: 1500 });
@@ -307,25 +354,52 @@ describe('api', () => {
       },
       daily: { time: ['2026-11-01', '2026-11-02'], sunrise: [null, null], sunset: [null, null] },
     };
-    const marine = { hourly: { time: [], wave_height: [], wave_period: [], sea_level_height_msl: [], sea_surface_temperature: [] } };
+    const marine = {
+      hourly: {
+        time: [],
+        wave_height: [],
+        wave_period: [],
+        sea_level_height_msl: [],
+        sea_surface_temperature: [],
+      },
+    };
     const [h23, h0] = parseForecast(spot, fc, marine, 0).hours;
-    expect(h23).toMatchObject({ date: '2026-11-01', hour: 23, precip: 6.5, gust: 48, code: 95, cape: 800 });
+    expect(h23).toMatchObject({
+      date: '2026-11-01',
+      hour: 23,
+      precip: 6.5,
+      gust: 48,
+      code: 95,
+      cape: 800,
+    });
     expect(h0).toMatchObject({ date: '2026-11-02', hour: 0, precip: 0, gust: 15, code: 3 });
   });
 
   it('search maps results to name and region', async () => {
-    const fake = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          results: [
-            { id: 1, name: 'Koh Tao', latitude: 10.1, longitude: 99.84, admin1: 'Surat Thani', country: 'Thailand' },
-          ],
-        }),
-      ),
+    const fake = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            results: [
+              {
+                id: 1,
+                name: 'Koh Tao',
+                latitude: 10.1,
+                longitude: 99.84,
+                admin1: 'Surat Thani',
+                country: 'Thailand',
+              },
+            ],
+          }),
+        ),
     );
     const res = await searchPlaces('koh tao', undefined, fake as unknown as typeof fetch);
-    expect(res).toEqual([{ id: 1, name: 'Koh Tao', region: 'Surat Thani, Thailand', latitude: 10.1, longitude: 99.84 }]);
-    expect(await searchPlaces('zzz', undefined, (async () => new Response('{}')) as typeof fetch)).toEqual([]);
+    expect(res).toEqual([
+      { id: 1, name: 'Koh Tao', region: 'Surat Thani, Thailand', latitude: 10.1, longitude: 99.84 },
+    ]);
+    expect(
+      await searchPlaces('zzz', undefined, (async () => new Response('{}')) as typeof fetch),
+    ).toEqual([]);
   });
 
   it('null sea values mean the pin is on land', async () => {

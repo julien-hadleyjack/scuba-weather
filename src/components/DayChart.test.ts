@@ -5,7 +5,8 @@ import { sampleDashboard } from '../test/helpers';
 
 describe('DayChart', () => {
   const { today } = sampleDashboard();
-  const show = () => render(DayChart, { chart: today.chart, blocks: today.blocks, label: 'Chart text' });
+  const show = () =>
+    render(DayChart, { chart: today.chart, blocks: today.blocks, label: 'Chart text' });
 
   it('draws one continuous chart for the day with 2-hour labels under the bars (DASH-7)', () => {
     const { container } = show();
@@ -24,7 +25,7 @@ describe('DayChart', () => {
     for (const g of groups) expect(g.querySelectorAll('rect:not([y="0"])')).toHaveLength(6);
   });
 
-  it("dims only the part of a block that is over (DASH-9)", () => {
+  it('dims only the part of a block that is over (DASH-9)', () => {
     const { container } = show();
     const groups = [...container.querySelectorAll('svg > g')];
     expect(groups.map((g) => g.classList.contains('past'))).toEqual([true, false, false]);

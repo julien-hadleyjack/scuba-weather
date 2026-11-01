@@ -89,7 +89,8 @@ export function buildDay(forecast: Forecast, date: string, now: LocalTime): DayV
 
   const byHour = new Map(all.map((h) => [h.hour, h]));
   const hours: ChartHour[] = [];
-  for (let h = DAY_START; h < DAY_END; h++) hours.push({ hour: h, precip: byHour.get(h)?.precip ?? null });
+  for (let h = DAY_START; h < DAY_END; h++)
+    hours.push({ hour: h, precip: byHour.get(h)?.precip ?? null });
 
   // Tide at 06 … 24, where 24 is the next day's 00:00. Scaled between the
   // lowest and highest sea level of the calendar day (plus that end point).
@@ -137,7 +138,10 @@ export function buildDashboard(forecast: Forecast, nowMs: number): DashboardView
   for (let i = 2; i <= 4; i++) {
     const date = addDays(now.date, i);
     if (!hasDay(forecast, date)) continue;
-    outlook.push({ date, cells: classifyWindow(window(hoursOf(forecast, date), DAY_START, DAY_END)) });
+    outlook.push({
+      date,
+      cells: classifyWindow(window(hoursOf(forecast, date), DAY_START, DAY_END)),
+    });
   }
   return {
     now,

@@ -19,7 +19,9 @@ export function describeBlock(
   else if (wet.length === 0) parts.push('dry');
   else {
     const peak = wet.reduce((a, b) => ((b.precip ?? 0) > (a.precip ?? 0) ? b : a));
-    parts.push(`rain in ${wet.length} of ${rain.length} hours, peak ${formatMm(peak.precip!)} mm/h at ${pad2(peak.hour)}:00`);
+    parts.push(
+      `rain in ${wet.length} of ${rain.length} hours, peak ${formatMm(peak.precip!)} mm/h at ${pad2(peak.hour)}:00`,
+    );
   }
 
   const t = tide.filter((v): v is number => v !== null);
