@@ -15,7 +15,8 @@ npm run dev        # http://localhost:5173
 npm test           # unit, component and accessibility tests (Vitest)
 npm run coverage   # tests with coverage report (text + coverage/index.html)
 npm run check      # svelte-check / TypeScript
-npm run lint       # ESLint + Prettier check (`npm run format` fixes formatting)
+npm run lint       # all prek hooks on all files (formatting, ESLint, file checks)
+npm run format     # Prettier only
 mise run ci        # lint, type check, test and build, as in CI
 npm run build      # production build in dist/ (with service worker)
 npm run preview    # serve dist/ locally

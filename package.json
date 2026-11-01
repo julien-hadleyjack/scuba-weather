@@ -11,7 +11,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "icons": "node scripts/icons.mjs",
     "coverage": "vitest run --coverage",
-    "lint": "eslint . && prettier --check .",
+    "lint": "prek run --all-files",
     "format": "prettier --write ."
   },
   "devDependencies": {

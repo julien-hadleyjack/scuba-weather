@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#MISE description="Lint, type check, test and build, as in CI"
+#MISE quiet=true
+set -euo pipefail
+
+# Runs one step and stops at the first failure. On GitHub Actions the step is a
+# collapsible log group, and a failure also becomes an annotation.
+step() {
+  local title=$1
+  shift
+  if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::group::$title"; else echo "── $title"; fi
+  local status=0
+  "$@" || status=$?
+  # Workflow commands must start a line; some tools end their output without a newline.
+  if [[ -n ${GITHUB_ACTIONS:-} ]]; then printf '\n::endgroup::\n'; fi
+  if ((status)); then
+    if [[ -n ${GITHUB_ACTIONS:-} ]]; then echo "::error title=$title failed::$* exited with $status"; fi
+    exit "$status"
+  fi
+}
+
+step "Lint" npm run lint -- --show-diff-on-failure
+step "Type check" npm run check
+step "Test" npm test
+step "Build" npm run build

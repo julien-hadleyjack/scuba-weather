@@ -241,7 +241,7 @@ Data age is always shown as a duration, never as a clock time:
 ## 10. Technology
 
 - **Framework:** Svelte 5 + TypeScript, a plain Svelte SPA (no SvelteKit). Chosen over Preact for less code, built-in scoped styles and no hooks pitfalls; React, Stencil, Lit and Solid were also considered.
-- **Build:** Vite 8 (Rolldown). Node.js: latest LTS, pinned in `mise.toml`.
+- **Build:** Vite 8 (Rolldown). Node.js: latest LTS, pinned in `.mise/config.toml`.
 - **PWA:** vite-plugin-pwa (Workbox): offline app shell, installable, automatic updates.
 - **Data:** Open-Meteo only (Geocoding, Forecast and Marine APIs), no key, no backend.
 - **Map:** Leaflet + OpenStreetMap tiles, lazy-loaded with the spot screen; attribution required.
