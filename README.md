@@ -23,8 +23,9 @@ npm run lint       # ESLint
 npm run format     # Prettier (format:check to only check)
 ```
 
-With [mise](https://mise.jdx.dev), `mise install` sets up Node (version read from `.nvmrc`)
-and [prek](https://prek.j178.dev). Run `prek install` once per clone to enable the Git hooks
+With [mise](https://mise.jdx.dev), `mise trust && mise install` sets up Node (version read from
+`.nvmrc`; mise only applies that setting once the folder is trusted) and [prek](https://prek.j178.dev).
+CI installs the same tools from `mise.toml`. Run `prek install` once per clone to enable the Git hooks
 in `prek.toml`: formatting, lint and file checks on commit; type check and tests on push.
 CI runs the same hooks, so a commit made without them is still caught.
 

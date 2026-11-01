@@ -18,20 +18,27 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # mise ignores [settings] in untrusted config files; the mise shims for
+      # node and prek re-read the config in every later step too.
+      MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Setup Node and prek (mise.toml, Node version from .nvmrc)
+        uses: jdx/mise-action@v5
+      - name: Cache npm downloads
+        uses: actions/cache@v6
         with:
-          node-version-file: '.nvmrc'
-          cache: npm
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
       - name: Install dependencies
         run: npm ci
       - name: Hooks (formatting, lint, file checks)
-        uses: j178/prek-action@v3.1.0
+        run: prek run --all-files --show-diff-on-failure
       - name: Type check
         run: npm run check
       - name: Test
